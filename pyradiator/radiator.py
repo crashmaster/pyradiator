@@ -1,14 +1,23 @@
+import argparse
+import collections
 import logging
 import sys
 
 import pygame
 
+IS_HELP_MODE = any(x in sys.argv for x in ["-h", "--help"])
+LOG_LEVEL = logging.ERROR if IS_HELP_MODE else logging.DEBUG
 FORMAT = "%(asctime)-15s %(name)s - %(levelname)s - %(message)s"
-logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+logging.basicConfig(format=FORMAT, level=LOG_LEVEL)
+
 LOGGER = logging.getLogger("watrad")
 
+BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-EDGE_OFFSET = 5
+COLORS = collections.OrderedDict([
+    ("white", (WHITE)),
+    ("black", (BLACK)),
+])
 
 
 def initialize_pygame_modules():
@@ -24,31 +33,89 @@ def get_display_info():
     return display_info
 
 
-def create_main_surface(display_info):
-    resolution = (int(display_info.current_w / 2),
-                  int(display_info.current_h / 2))
+class StoreSize(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=None, const=None, **kwargs):
+        if const is None:
+            raise ValueError("const for '{}' not set".format(option_strings))
+        super(StoreSize, self).__init__(
+            option_strings, dest, nargs, const, **kwargs
+        )
+
+    def __call__(self, parser, namespace, value, option_string):
+        if value > self.const:
+            raise ValueError("'{}' too big, max: {}".
+                             format(option_string, self.const))
+        setattr(namespace, self.dest, value)
+
+
+def parse_arguments(display_info):
+    parser = argparse.ArgumentParser(
+        description="THE Radiator.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--window-width",
+                        type=int,
+                        default=int(display_info.current_w),
+                        action=StoreSize,
+                        const=display_info.current_w,
+                        help="Width in pixels of the main window.")
+    parser.add_argument("--window-height",
+                        type=int,
+                        action=StoreSize,
+                        const=display_info.current_h,
+                        default=int(display_info.current_h),
+                        help="Height in pixels of the main window.")
+    parser.add_argument("--margin-size",
+                        type=int,
+                        action=StoreSize,
+                        const=50,
+                        default=5,
+                        help="Margin size in pixels of the surfaces.")
+    parser.add_argument("--surface-fg-color",
+                        default="white",
+                        choices=["white", "black"],
+                        help="Foreground color of the surfaces.")
+    parser.add_argument("--surface-bg-color",
+                        default="black",
+                        choices=["white", "black"],
+                        help="Background color of the surfaces.")
+    parser.add_argument("--font-fg-color",
+                        default="white",
+                        choices=["white", "black"],
+                        help="Foreground color of the fonts.")
+    parser.add_argument("--font-bg-color",
+                        default="black",
+                        choices=["white", "black"],
+                        help="Background color of the fonts.")
+    return parser.parse_args()
+
+
+def create_main_surface(args):
+    resolution = (args.window_width, args.window_height)
     flags = pygame.DOUBLEBUF | pygame.HWSURFACE
     main_surface = pygame.display.set_mode(resolution, flags)
-    LOGGER.debug("Main surface with resolution: {} created".format(resolution))
+    main_surface.fill(COLORS[args.surface_bg_color])
+    LOGGER.debug("Main surface with resolution: {} created".
+                 format(resolution))
     return main_surface
 
 
-def create_sub_surface(main_surface, x, y, width, height):
+def create_sub_surface(args, main_surface, x, y, width, height):
     sub_surface = main_surface.subsurface((x, y, width, height))
+    sub_surface.fill(COLORS[args.surface_fg_color])
     LOGGER.debug("Sub surface with resolution: {} @ {} created".
                  format((width, height), (x, y)))
     return sub_surface
 
 
-def create_sub_surfaces(display_info, main_surface):
-    quarter_width = int(display_info.current_w / 4)
-    quarter_height = int(display_info.current_h / 4)
+def create_sub_surfaces(args, main_surface):
+    quarter_width = int(args.window_width / 2)
+    quarter_height = int(args.window_height / 2)
     return [
-        create_sub_surface(main_surface,
-                           EDGE_OFFSET + i * quarter_width,
-                           EDGE_OFFSET + j * quarter_height,
-                           quarter_width - (2 * EDGE_OFFSET),
-                           quarter_height - (2 * EDGE_OFFSET))
+        create_sub_surface(args, main_surface,
+                           args.margin_size + i * quarter_width,
+                           args.margin_size + j * quarter_height,
+                           quarter_width - (2 * args.margin_size),
+                           quarter_height - (2 * args.margin_size))
         for i in range(2) for j in range(2)
     ]
 
@@ -70,8 +137,9 @@ def loop():
 def main():
     initialize_pygame_modules()
     display_info = get_display_info()
-    main_surface = create_main_surface(display_info)
-    create_sub_surfaces(display_info, main_surface)
+    args = parse_arguments(display_info)
+    main_surface = create_main_surface(args)
+    create_sub_surfaces(args, main_surface)
     loop()
 
 sys.exit(main())
