@@ -52,18 +52,22 @@ def parse_arguments(display_info):
     parser = argparse.ArgumentParser(
         description="THE Radiator.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--fullscreen",
+                        action="store_true",
+                        default=False,
+                        help="Display radiator in fullscreen mode.")
     parser.add_argument("--window-width",
                         type=int,
                         default=int(display_info.current_w),
                         action=StoreSize,
                         const=display_info.current_w,
-                        help="Width in pixels of the main window.")
+                        help="Width in pixels of the radiator.")
     parser.add_argument("--window-height",
                         type=int,
                         action=StoreSize,
                         const=display_info.current_h,
                         default=int(display_info.current_h),
-                        help="Height in pixels of the main window.")
+                        help="Height in pixels of the radiator.")
     parser.add_argument("--margin-size",
                         type=int,
                         action=StoreSize,
@@ -90,8 +94,11 @@ def parse_arguments(display_info):
 
 
 def create_main_surface(args):
+    pygame.display.set_caption("PyRadiator")
     resolution = (args.window_width, args.window_height)
     flags = pygame.DOUBLEBUF | pygame.HWSURFACE
+    if args.fullscreen:
+        flags |= pygame.FULLSCREEN
     main_surface = pygame.display.set_mode(resolution, flags)
     main_surface.fill(COLORS[args.surface_bg_color])
     LOGGER.debug("Main surface with resolution: {} created".
