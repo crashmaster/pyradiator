@@ -94,11 +94,12 @@ def parse_arguments(display_info):
 
 
 def create_main_surface(args):
-    pygame.display.set_caption("PyRadiator")
+    pygame.display.set_caption("PyRadiator by Crashmaster")
     resolution = (args.window_width, args.window_height)
     flags = pygame.DOUBLEBUF | pygame.HWSURFACE
     if args.fullscreen:
         flags |= pygame.FULLSCREEN
+        LOGGER.debug("Fullscreen mode enabled")
     main_surface = pygame.display.set_mode(resolution, flags)
     main_surface.fill(COLORS[args.surface_bg_color])
     LOGGER.debug("Main surface with resolution: {} created".
