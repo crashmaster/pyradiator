@@ -1,10 +1,15 @@
 import datetime
 import logging
+import subprocess
 import sys
 
 import pygame
 
 import command_line_args
+from dispatcher import Dispatcher
+from endpoint import Producer
+from endpoint import Consumer
+
 
 IS_HELP_MODE = any(x in sys.argv for x in ["-h", "--help", "list"])
 LOG_LEVEL = logging.ERROR if IS_HELP_MODE else logging.DEBUG
@@ -96,6 +101,23 @@ def loop(args, subsurfaces, font):
         pygame.time.wait(0)
 
 
+def ask_the_cow():
+    proc1 = subprocess.Popen(["fortune", "-s"], stdout=subprocess.PIPE)
+    proc2 = subprocess.Popen(["cowsay"], stdin=proc1.stdout,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc1.stdout.close()
+    return proc2.communicate()[0].decode().split("\n")
+
+
+def print_cow(args, cow_output, surface, font):
+    surface.fill(args.sub_surface_color)
+    text_y_offset = 5
+    for line in cow_output.decode().split("\n"):
+        rendered_line = font.render(line, 1, args.font_fg_color, args.font_bg_color)
+        surface.blit(rendered_line, (5, text_y_offset))
+        text_y_offset += 20
+
+
 def main():
     initialize_pygame_modules()
     display_info = get_display_info()
@@ -103,6 +125,18 @@ def main():
     main_surface = create_main_surface(args)
     subsurfaces = create_sub_surfaces(args, main_surface)
     font = create_font(args)
+
+    cow_dispatcher_1 = Dispatcher()
+    cow_dispatcher_1.start()
+    cow_producer_1 = Producer(2, cow_dispatcher_1.input_queue, ask_the_cow)
+    cow_producer_1.start()
+    cow_consumer_1 = Consumer(1, cow_dispatcher_1.output_queue, print_cow, args, subsurfaces[0], font)
+    cow_consumer_1.start()
+
     loop(args, subsurfaces, font)
+
+    cow_consumer_1.stop()
+    cow_producer_1.stop()
+    cow_dispatcher_1.stop()
 
 sys.exit(main())
