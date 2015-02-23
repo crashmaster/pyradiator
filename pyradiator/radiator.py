@@ -147,9 +147,9 @@ def main():
 
     loop(args, subsurfaces, font)
 
-    cow_consumer_2.stop()
-    cow_producer_2.stop()
-    cow_dispatcher_2.stop()
+    cow_consumer_1.stop()
+    cow_producer_1.stop()
+    cow_dispatcher_1.stop()
 
     cow_consumer_2.stop()
     cow_producer_2.stop()
