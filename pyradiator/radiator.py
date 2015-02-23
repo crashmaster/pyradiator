@@ -10,6 +10,8 @@ from dispatcher import Dispatcher
 from endpoint import Producer
 from endpoint import Consumer
 
+PY3K = sys.version_info >= (3, 0)
+
 
 IS_HELP_MODE = any(x in sys.argv for x in ["-h", "--help", "list"])
 LOG_LEVEL = logging.ERROR if IS_HELP_MODE else logging.DEBUG
@@ -90,7 +92,7 @@ def loop(args, subsurfaces, font):
             elif event.type == display_refresh:
                 pygame.display.flip()
 
-        for subsurface in subsurfaces:
+        for subsurface in subsurfaces[:-2]:
             subsurface.fill(args.sub_surface_color)
             time = font.render(str(datetime.datetime.now()),
                                True,
@@ -106,16 +108,19 @@ def ask_the_cow():
     proc2 = subprocess.Popen(["cowsay"], stdin=proc1.stdout,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     proc1.stdout.close()
-    return proc2.communicate()[0].decode().split("\n")
+    if PY3K:
+        return proc2.communicate()[0].decode().split("\n")
+    else:
+        return proc2.communicate()[0].split("\n")
 
 
-def print_cow(args, cow_output, surface, font):
+def print_cow(cow_output, args, surface, font):
     surface.fill(args.sub_surface_color)
-    text_y_offset = 5
-    for line in cow_output.decode().split("\n"):
+    text_y_offset = 0
+    for line in cow_output:
         rendered_line = font.render(line, 1, args.font_fg_color, args.font_bg_color)
         surface.blit(rendered_line, (5, text_y_offset))
-        text_y_offset += 20
+        text_y_offset += 24
 
 
 def main():
@@ -130,13 +135,24 @@ def main():
     cow_dispatcher_1.start()
     cow_producer_1 = Producer(2, cow_dispatcher_1.input_queue, ask_the_cow)
     cow_producer_1.start()
-    cow_consumer_1 = Consumer(1, cow_dispatcher_1.output_queue, print_cow, args, subsurfaces[0], font)
+    cow_consumer_1 = Consumer(1, cow_dispatcher_1.output_queue, print_cow, args, subsurfaces[-1], font)
     cow_consumer_1.start()
+
+    cow_dispatcher_2 = Dispatcher()
+    cow_dispatcher_2.start()
+    cow_producer_2 = Producer(2, cow_dispatcher_2.input_queue, ask_the_cow)
+    cow_producer_2.start()
+    cow_consumer_2 = Consumer(1, cow_dispatcher_2.output_queue, print_cow, args, subsurfaces[-2], font)
+    cow_consumer_2.start()
 
     loop(args, subsurfaces, font)
 
-    cow_consumer_1.stop()
-    cow_producer_1.stop()
-    cow_dispatcher_1.stop()
+    cow_consumer_2.stop()
+    cow_producer_2.stop()
+    cow_dispatcher_2.stop()
+
+    cow_consumer_2.stop()
+    cow_producer_2.stop()
+    cow_dispatcher_2.stop()
 
 sys.exit(main())
