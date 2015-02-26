@@ -133,16 +133,27 @@ def main():
 
     cow_dispatcher_1 = Dispatcher()
     cow_dispatcher_1.start()
-    cow_producer_1 = Producer(30, cow_dispatcher_1.input_queue, ask_the_cow)
+    cow_producer_1 = Producer(40, cow_dispatcher_1.input_queue, ask_the_cow)
     cow_producer_1.start()
-    cow_consumer_1 = Consumer(1, cow_dispatcher_1.output_queue, print_cow, args, subsurfaces[-1], font)
+    cow_consumer_1 = Consumer(2, cow_dispatcher_1.output_queue, print_cow, args, subsurfaces[-1], font)
     cow_consumer_1.start()
+
+    cow_dispatcher_2 = Dispatcher()
+    cow_dispatcher_2.start()
+    cow_producer_2 = Producer(40, cow_dispatcher_2.input_queue, ask_the_cow)
+    cow_producer_2.start()
+    cow_consumer_2 = Consumer(2, cow_dispatcher_2.output_queue, print_cow, args, subsurfaces[-2], font)
+    cow_consumer_2.start()
 
     loop(args, subsurfaces, font)
 
     cow_consumer_1.stop()
     cow_producer_1.stop()
     cow_dispatcher_1.stop()
+
+    cow_consumer_2.stop()
+    cow_producer_2.stop()
+    cow_dispatcher_2.stop()
 
 
 sys.exit(main())

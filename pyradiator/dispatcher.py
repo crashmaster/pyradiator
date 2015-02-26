@@ -1,7 +1,5 @@
 import multiprocessing
 
-import six
-
 
 class Dispatcher(object):
 
@@ -21,11 +19,8 @@ class Dispatcher(object):
         self.output_queue.close()
         self.__process.join()
         self.__process.terminate()
-        six.print_("Stop process.")
 
     def __worker(self):
-        six.print_("Start worker.")
         for function, args in iter(self.input_queue.get, self.STOP_SENTINEL):
             result = function(*args)
             self.output_queue.put(result)
-        six.print_("Stop worker.")
