@@ -1,8 +1,9 @@
 import logging
 import math
+import os
+import random
 import subprocess
 import sys
-import os
 
 import pygame
 
@@ -68,6 +69,31 @@ def create_sub_surfaces(args, main_surface):
     ]
 
 
+def create_static_surface(args, surface):
+    (width, height) = surface.get_size()
+    static_width = width + 60
+    static_height = height + 60
+    static = pygame.Surface((static_width, static_height))
+    colors = static.map_rgb(args.font_bg_color), static.map_rgb(args.font_fg_color)
+    random_choice = random.choice
+    set_pixel_color_at = static.set_at
+    y_range = range(static_height)
+    for x in range(static_width):
+        for y in y_range:
+            set_pixel_color_at((x, y), random_choice(colors))
+    return static
+
+
+def create_no_signal_overlay(args):
+    font = create_font(args, 24)
+    text = "No Signal."
+    no_signal = font.render(text, 1, args.font_fg_color)
+    overlay = pygame.Surface(tuple(x + 5 for x in font.size(text)), pygame.SRCALPHA)
+    overlay.fill((30, 30, 30, 200))
+    overlay.blit(no_signal, (5, 0))
+    return overlay
+
+
 def create_font(args, font_size=None):
     if args.font in pygame.font.get_fonts():
         return pygame.font.SysFont(args.font,
@@ -79,10 +105,11 @@ def create_font(args, font_size=None):
                                 args.font_size)
 
 
-def loop(args, subsurfaces):
-    fps = 10
+def loop(args, subsurfaces, static, overlay):
+    fps = 50
     display_refresh = pygame.USEREVENT
     pygame.time.set_timer(display_refresh, int(1000.0 / fps))
+    rrr = random.randrange
     running = True
     while running:
         for event in pygame.event.get():
@@ -90,52 +117,67 @@ def loop(args, subsurfaces):
                 running = False
             elif event.type == display_refresh:
                 pygame.display.flip()
+            x_offset = rrr(30) - 30
+            y_offset = rrr(30) - 30
+            static.scroll(x_offset, y_offset)
+            subsurfaces[3].blit(static, (0, 0))
+            subsurfaces[3].blit(overlay, (5, 5))
 
         pygame.time.wait(0)
 
 
+def execute_simple_command(command):
+    try:
+        proc = subprocess.Popen(command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+    except OSError:
+        return
+    else:
+        if PY3K:
+            return proc.communicate()[0].decode().split("\n")
+        else:
+            return proc.communicate()[0].split("\n")
+
+
+def execute_compound_command(command_1, command_2):
+    process_1 = subprocess.Popen(command_1, stdout=subprocess.PIPE)
+    process_2 = subprocess.Popen(command_2,
+                                 stdin=process_1.stdout,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+    process_1.stdout.close()
+    if PY3K:
+        return process_2.communicate()[0].decode().split("\n")
+    else:
+        return process_2.communicate()[0].split("\n")
+
+
 class AskTheCow(object):
 
+    def __init__(self):
+        self.cows = ["-b", "-d", "-g", "-p", "-s", "-t", "-w", "-y"]
+
     def __call__(self):
-        proc1 = subprocess.Popen(["fortune", "-s"], stdout=subprocess.PIPE)
-        proc2 = subprocess.Popen(["cowsay"], stdin=proc1.stdout,
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        proc1.stdout.close()
-        if PY3K:
-            return proc2.communicate()[0].decode().split("\n")
-        else:
-            return proc2.communicate()[0].split("\n")
+        return execute_compound_command(["fortune", "-s"], ["cowsay", random.choice(self.cows)])
 
 
 class AskTop(object):
 
     def __call__(self):
-        proc = subprocess.Popen(["top", "-H", "-b", "-n1", "-p", str(os.getppid())],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if PY3K:
-            return proc.communicate()[0].decode().split("\n")
-        else:
-            return proc.communicate()[0].split("\n")
+        return execute_simple_command(["top", "-H", "-b", "-n1", "-p", str(os.getppid())])
 
 
 class AskW(object):
 
     def __call__(self):
-        proc = subprocess.Popen(["w", "-s"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if PY3K:
-            return proc.communicate()[0].decode().split("\n")
-        else:
-            return proc.communicate()[0].split("\n")
+        return execute_simple_command(["w", "-s"])
 
 
 class AskFinger(object):
 
     def __call__(self):
-        proc = subprocess.Popen(["finger", os.getlogin()], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if PY3K:
-            return proc.communicate()[0].decode().split("\n")
-        else:
-            return proc.communicate()[0].split("\n")
+        return execute_simple_command(["finger", os.getlogin()])
 
 
 class PrintText(object):
@@ -148,6 +190,9 @@ class PrintText(object):
         self.text_y_offset = self.__get_text_y_offset(font_size)
 
     def __call__(self, lines_to_print):
+        if not lines_to_print:
+            return
+
         self.surface.fill(self.args.sub_surface_color)
         offset = 0
         for line in lines_to_print:
@@ -169,22 +214,24 @@ def main():
 
     main_surface = create_main_surface(args)
     subsurfaces = create_sub_surfaces(args, main_surface)
+    static = create_static_surface(args, subsurfaces[3])
+    overlay = create_no_signal_overlay(args)
 
     top_channel = RadiatorChannel(AskTop(), PrintText(args, subsurfaces[0], 16), 2)
     top_channel.turn_on()
-    cow_channel = RadiatorChannel(AskTheCow(), PrintText(args, subsurfaces[1], 26), 40)
+    cow_channel = RadiatorChannel(AskTheCow(), PrintText(args, subsurfaces[1], 26), 10)
     cow_channel.turn_on()
     w_channel = RadiatorChannel(AskW(), PrintText(args, subsurfaces[2], 16), 2)
     w_channel.turn_on()
-    finger_channel = RadiatorChannel(AskFinger(), PrintText(args, subsurfaces[3], 16), 10)
-    finger_channel.turn_on()
+#   finger_channel = RadiatorChannel(AskFinger(), PrintText(args, subsurfaces[3], 16), 10)
+#   finger_channel.turn_on()
 
-    loop(args, subsurfaces)
+    loop(args, subsurfaces, static, overlay)
 
     top_channel.turn_off()
     cow_channel.turn_off()
     w_channel.turn_off()
-    finger_channel.turn_off()
+#   finger_channel.turn_off()
 
 
 sys.exit(main())
