@@ -1,14 +1,13 @@
-import datetime
 import logging
+import math
 import subprocess
 import sys
+import os
 
 import pygame
 
 import command_line_args
-from dispatcher import Dispatcher
-from endpoint import Producer
-from endpoint import Consumer
+from radiator_channel import RadiatorChannel
 
 PY3K = sys.version_info >= (3, 0)
 
@@ -69,10 +68,10 @@ def create_sub_surfaces(args, main_surface):
     ]
 
 
-def create_font(args):
+def create_font(args, font_size=None):
     if args.font in pygame.font.get_fonts():
         return pygame.font.SysFont(args.font,
-                                   args.font_size,
+                                   font_size if font_size else args.font_size,
                                    args.font_bold,
                                    args.font_italic)
     else:
@@ -80,80 +79,112 @@ def create_font(args):
                                 args.font_size)
 
 
-def loop(args, subsurfaces, font):
-    fps = 60
+def loop(args, subsurfaces):
+    fps = 10
     display_refresh = pygame.USEREVENT
     pygame.time.set_timer(display_refresh, int(1000.0 / fps))
     running = True
     while running:
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 running = False
             elif event.type == display_refresh:
                 pygame.display.flip()
 
-        for subsurface in subsurfaces[:-2]:
-            subsurface.fill(args.sub_surface_color)
-            time = font.render(str(datetime.datetime.now()),
-                               True,
-                               args.font_fg_color,
-                               args.font_bg_color)
-            subsurface.blit(time, (0, 0))
-
         pygame.time.wait(0)
 
 
-def ask_the_cow():
-    proc1 = subprocess.Popen(["fortune", "-s"], stdout=subprocess.PIPE)
-    proc2 = subprocess.Popen(["cowsay"], stdin=proc1.stdout,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    proc1.stdout.close()
-    if PY3K:
-        return proc2.communicate()[0].decode().split("\n")
-    else:
-        return proc2.communicate()[0].split("\n")
+class AskTheCow(object):
+
+    def __call__(self):
+        proc1 = subprocess.Popen(["fortune", "-s"], stdout=subprocess.PIPE)
+        proc2 = subprocess.Popen(["cowsay"], stdin=proc1.stdout,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc1.stdout.close()
+        if PY3K:
+            return proc2.communicate()[0].decode().split("\n")
+        else:
+            return proc2.communicate()[0].split("\n")
 
 
-def print_cow(cow_output, args, surface, font):
-    surface.fill(args.sub_surface_color)
-    text_y_offset = 0
-    for line in cow_output:
-        rendered_line = font.render(line, 1, args.font_fg_color, args.font_bg_color)
-        surface.blit(rendered_line, (5, text_y_offset))
-        text_y_offset += 24
+class AskTop(object):
+
+    def __call__(self):
+        proc = subprocess.Popen(["top", "-H", "-b", "-n1", "-p", str(os.getppid())],
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if PY3K:
+            return proc.communicate()[0].decode().split("\n")
+        else:
+            return proc.communicate()[0].split("\n")
+
+
+class AskW(object):
+
+    def __call__(self):
+        proc = subprocess.Popen(["w", "-s"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if PY3K:
+            return proc.communicate()[0].decode().split("\n")
+        else:
+            return proc.communicate()[0].split("\n")
+
+
+class AskFinger(object):
+
+    def __call__(self):
+        proc = subprocess.Popen(["finger", os.getlogin()], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if PY3K:
+            return proc.communicate()[0].decode().split("\n")
+        else:
+            return proc.communicate()[0].split("\n")
+
+
+class PrintText(object):
+
+    def __init__(self, args, surface, font_size=None):
+        self.args = args
+        self.surface = surface
+        self.font = create_font(args, font_size)
+        self.font_antialias = True
+        self.text_y_offset = self.__get_text_y_offset(font_size)
+
+    def __call__(self, lines_to_print):
+        self.surface.fill(self.args.sub_surface_color)
+        offset = 0
+        for line in lines_to_print:
+            rendered_line = self.font.render(line,
+                                             self.font_antialias,
+                                             self.args.font_fg_color,
+                                             self.args.font_bg_color)
+            self.surface.blit(rendered_line, (0, offset))
+            offset += self.text_y_offset
+
+    def __get_text_y_offset(self, font_size):
+        return math.ceil((font_size if font_size else self.args.font_size) * 1.25)
 
 
 def main():
     initialize_pygame_modules()
     display_info = get_display_info()
     args = command_line_args.parse_arguments(display_info)
+
     main_surface = create_main_surface(args)
     subsurfaces = create_sub_surfaces(args, main_surface)
-    font = create_font(args)
 
-    cow_dispatcher_1 = Dispatcher()
-    cow_dispatcher_1.start()
-    cow_producer_1 = Producer(40, cow_dispatcher_1.input_queue, ask_the_cow)
-    cow_producer_1.start()
-    cow_consumer_1 = Consumer(2, cow_dispatcher_1.output_queue, print_cow, args, subsurfaces[-1], font)
-    cow_consumer_1.start()
+    top_channel = RadiatorChannel(AskTop(), PrintText(args, subsurfaces[0], 16), 2)
+    top_channel.turn_on()
+    cow_channel = RadiatorChannel(AskTheCow(), PrintText(args, subsurfaces[1], 26), 40)
+    cow_channel.turn_on()
+    w_channel = RadiatorChannel(AskW(), PrintText(args, subsurfaces[2], 16), 2)
+    w_channel.turn_on()
+    finger_channel = RadiatorChannel(AskFinger(), PrintText(args, subsurfaces[3], 16), 10)
+    finger_channel.turn_on()
 
-    cow_dispatcher_2 = Dispatcher()
-    cow_dispatcher_2.start()
-    cow_producer_2 = Producer(40, cow_dispatcher_2.input_queue, ask_the_cow)
-    cow_producer_2.start()
-    cow_consumer_2 = Consumer(2, cow_dispatcher_2.output_queue, print_cow, args, subsurfaces[-2], font)
-    cow_consumer_2.start()
+    loop(args, subsurfaces)
 
-    loop(args, subsurfaces, font)
-
-    cow_consumer_1.stop()
-    cow_producer_1.stop()
-    cow_dispatcher_1.stop()
-
-    cow_consumer_2.stop()
-    cow_producer_2.stop()
-    cow_dispatcher_2.stop()
+    top_channel.turn_off()
+    cow_channel.turn_off()
+    w_channel.turn_off()
+    finger_channel.turn_off()
 
 
 sys.exit(main())
