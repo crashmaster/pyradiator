@@ -186,6 +186,7 @@ def main():
     channels = [
         RadiatorChannel(
             args=args,
+            name="Channel top",
             surface=subsurfaces[0],
             input_functor=AskTop(),
             output_functor=PrintText(args=args,
@@ -195,6 +196,7 @@ def main():
         ),
         RadiatorChannel(
             args=args,
+            name="Channel cowsay",
             surface=subsurfaces[1],
             input_functor=AskTheCow(),
             output_functor=PrintText(args=args,
@@ -204,6 +206,7 @@ def main():
         ),
         RadiatorChannel(
             args=args,
+            name="Channel w",
             surface=subsurfaces[2],
             input_functor=AskW(),
             output_functor=PrintText(args=args,
@@ -213,6 +216,7 @@ def main():
         ),
         RadiatorChannel(
             args=args,
+            name="Channel finger",
             surface=subsurfaces[3],
             input_functor=AskFinger(),
             output_functor=PrintText(args=args,

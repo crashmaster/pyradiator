@@ -30,9 +30,9 @@ def create_static_surface(args, surface):
     return static
 
 
-def create_no_signal_overlay(args):
+def create_no_signal_overlay(args, channel_name):
     font = create_font(args, 24)
-    text = "No Signal."
+    text = "{}: {}.".format(channel_name, "No signal")
     no_signal = font.render(text, 1, args.font_fg_color)
     overlay = pygame.Surface(tuple(x + 5 for x in font.size(text)), pygame.SRCALPHA)
     overlay.fill((30, 30, 30, 200))
@@ -41,10 +41,10 @@ def create_no_signal_overlay(args):
 
 
 class RadiatorChannel(object):
-    def __init__(self, args, surface, input_functor, output_functor, update_period):
+    def __init__(self, args, name, surface, input_functor, output_functor, update_period):
         self.surface = surface
         self.static = create_static_surface(args, self.surface)
-        self.overlay = create_no_signal_overlay(args)
+        self.overlay = create_no_signal_overlay(args, name)
         self.dispatcher = Dispatcher()
         self.producer = Producer(update_period,
                                  self.dispatcher.input_queue,
