@@ -17,7 +17,10 @@ def create_static_surface(args, surface):
     static_width = width + 60
     static_height = height + 60
     static = pygame.Surface((static_width, static_height))
-    colors = static.map_rgb(args.font_bg_color), static.map_rgb(args.font_fg_color)
+    colors = (
+        static.map_rgb(args.static_bg_color),
+        static.map_rgb(args.static_fg_color)
+    )
     random_choice = random.choice
     set_pixel_color_at = static.set_at
     y_range = range(static_height)

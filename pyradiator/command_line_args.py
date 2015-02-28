@@ -7,9 +7,11 @@ import pygame
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GRAY = (180, 180, 180)
 COLORS = collections.OrderedDict([
     ("white", WHITE),
     ("black", BLACK),
+    ("gray", GRAY),
 ])
 
 
@@ -84,15 +86,29 @@ def parse_arguments(display_info):
         "--main-surface-color",
         action=StoreColor,
         default=BLACK,
-        choices=["white", "black"],
+        choices=COLORS.keys(),
         help="Color of the main surfaces."
     )
     parser.add_argument(
         "--sub-surface-color",
         action=StoreColor,
         default=BLACK,
-        choices=["white", "black"],
+        choices=COLORS.keys(),
         help="Color of the sub-surfaces."
+    )
+    parser.add_argument(
+        "--static-fg-color",
+        action=StoreColor,
+        default=WHITE,
+        choices=COLORS.keys(),
+        help="Foreground color of the no-signal static noise."
+    )
+    parser.add_argument(
+        "--static-bg-color",
+        action=StoreColor,
+        default=BLACK,
+        choices=COLORS.keys(),
+        help="Background color of the no-signal static noise."
     )
     parser.add_argument(
         "--font",
@@ -123,14 +139,14 @@ def parse_arguments(display_info):
         "--font-fg-color",
         action=StoreColor,
         default=WHITE,
-        choices=["white", "black"],
+        choices=COLORS.keys(),
         help="Foreground color of the fonts."
     )
     parser.add_argument(
         "--font-bg-color",
         action=StoreColor,
         default=BLACK,
-        choices=["white", "black"],
+        choices=COLORS.keys(),
         help="Background color of the fonts."
     )
     return parser.parse_args()
