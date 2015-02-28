@@ -31,7 +31,7 @@ class Endpoint(object):
 class Producer(Endpoint):
 
     def _loop(self):
-        self.__put_item_into_the_queue()
+#       self.__put_item_into_the_queue()
         while not self._event.wait(self._period_in_seconds):
             self.__put_item_into_the_queue()
 
@@ -44,14 +44,19 @@ class Producer(Endpoint):
 
 class Consumer(Endpoint):
 
+    def __init__(self, period_in_seconds, queue, function, *args):
+        super(Consumer, self).__init__(period_in_seconds, queue, function, *args)
+        self.no_date_from_the_queue = True
+
     def _loop(self):
-        self.__get_item_out_of_the_queue()
+#       self.__get_item_out_of_the_queue()
         while not self._event.wait(self._period_in_seconds):
             self.__get_item_out_of_the_queue()
 
     def __get_item_out_of_the_queue(self):
         try:
             result = self._queue.get(block=False)
+            self.no_date_from_the_queue = result is None
         except queue.Empty:
             return
         else:

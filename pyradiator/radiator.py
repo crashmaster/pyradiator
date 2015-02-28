@@ -8,6 +8,7 @@ import sys
 import pygame
 
 import command_line_args
+from common import create_font
 from radiator_channel import RadiatorChannel
 
 PY3K = sys.version_info >= (3, 0)
@@ -69,47 +70,10 @@ def create_sub_surfaces(args, main_surface):
     ]
 
 
-def create_static_surface(args, surface):
-    (width, height) = surface.get_size()
-    static_width = width + 60
-    static_height = height + 60
-    static = pygame.Surface((static_width, static_height))
-    colors = static.map_rgb(args.font_bg_color), static.map_rgb(args.font_fg_color)
-    random_choice = random.choice
-    set_pixel_color_at = static.set_at
-    y_range = range(static_height)
-    for x in range(static_width):
-        for y in y_range:
-            set_pixel_color_at((x, y), random_choice(colors))
-    return static
-
-
-def create_no_signal_overlay(args):
-    font = create_font(args, 24)
-    text = "No Signal."
-    no_signal = font.render(text, 1, args.font_fg_color)
-    overlay = pygame.Surface(tuple(x + 5 for x in font.size(text)), pygame.SRCALPHA)
-    overlay.fill((30, 30, 30, 200))
-    overlay.blit(no_signal, (5, 0))
-    return overlay
-
-
-def create_font(args, font_size=None):
-    if args.font in pygame.font.get_fonts():
-        return pygame.font.SysFont(args.font,
-                                   font_size if font_size else args.font_size,
-                                   args.font_bold,
-                                   args.font_italic)
-    else:
-        return pygame.font.Font(args.font,
-                                args.font_size)
-
-
-def loop(args, subsurfaces, static, overlay):
+def loop(args, subsurfaces, channels):
     fps = 50
     display_refresh = pygame.USEREVENT
     pygame.time.set_timer(display_refresh, int(1000.0 / fps))
-    rrr = random.randrange
     running = True
     while running:
         for event in pygame.event.get():
@@ -117,11 +81,9 @@ def loop(args, subsurfaces, static, overlay):
                 running = False
             elif event.type == display_refresh:
                 pygame.display.flip()
-            x_offset = rrr(30) - 30
-            y_offset = rrr(30) - 30
-            static.scroll(x_offset, y_offset)
-            subsurfaces[3].blit(static, (0, 0))
-            subsurfaces[3].blit(overlay, (5, 5))
+            for channel in channels:
+                if channel.no_signal():
+                    channel.display_static()
 
         pygame.time.wait(0)
 
@@ -159,13 +121,17 @@ class AskTheCow(object):
         self.cows = ["-b", "-d", "-g", "-p", "-s", "-t", "-w", "-y"]
 
     def __call__(self):
-        return execute_compound_command(["fortune", "-s"], ["cowsay", random.choice(self.cows)])
+        return execute_compound_command(
+            ["fortune", "-s"], ["cowsay", random.choice(self.cows)]
+        )
 
 
 class AskTop(object):
 
     def __call__(self):
-        return execute_simple_command(["top", "-H", "-b", "-n1", "-p", str(os.getppid())])
+        return execute_simple_command(
+            ["top", "-H", "-b", "-n1", "-p", str(os.getppid())]
+        )
 
 
 class AskW(object):
@@ -204,7 +170,9 @@ class PrintText(object):
             offset += self.text_y_offset
 
     def __get_text_y_offset(self, font_size):
-        return math.ceil((font_size if font_size else self.args.font_size) * 1.25)
+        return math.ceil(
+            (font_size if font_size else self.args.font_size) * 1.25
+        )
 
 
 def main():
@@ -214,24 +182,53 @@ def main():
 
     main_surface = create_main_surface(args)
     subsurfaces = create_sub_surfaces(args, main_surface)
-    static = create_static_surface(args, subsurfaces[3])
-    overlay = create_no_signal_overlay(args)
 
-    top_channel = RadiatorChannel(AskTop(), PrintText(args, subsurfaces[0], 16), 2)
-    top_channel.turn_on()
-    cow_channel = RadiatorChannel(AskTheCow(), PrintText(args, subsurfaces[1], 26), 10)
-    cow_channel.turn_on()
-    w_channel = RadiatorChannel(AskW(), PrintText(args, subsurfaces[2], 16), 2)
-    w_channel.turn_on()
-#   finger_channel = RadiatorChannel(AskFinger(), PrintText(args, subsurfaces[3], 16), 10)
-#   finger_channel.turn_on()
+    channels = [
+        RadiatorChannel(
+            args=args,
+            surface=subsurfaces[0],
+            input_functor=AskTop(),
+            output_functor=PrintText(args=args,
+                                     surface=subsurfaces[0],
+                                     font_size=16),
+            update_period=5
+        ),
+        RadiatorChannel(
+            args=args,
+            surface=subsurfaces[1],
+            input_functor=AskTheCow(),
+            output_functor=PrintText(args=args,
+                                     surface=subsurfaces[1],
+                                     font_size=26),
+            update_period=10
+        ),
+        RadiatorChannel(
+            args=args,
+            surface=subsurfaces[2],
+            input_functor=AskW(),
+            output_functor=PrintText(args=args,
+                                     surface=subsurfaces[2],
+                                     font_size=16),
+            update_period=15
+        ),
+        RadiatorChannel(
+            args=args,
+            surface=subsurfaces[3],
+            input_functor=AskFinger(),
+            output_functor=PrintText(args=args,
+                                     surface=subsurfaces[3],
+                                     font_size=16),
+            update_period=20
+        )
+    ]
 
-    loop(args, subsurfaces, static, overlay)
+    for channel in channels:
+        channel.turn_on()
 
-    top_channel.turn_off()
-    cow_channel.turn_off()
-    w_channel.turn_off()
-#   finger_channel.turn_off()
+    loop(args, subsurfaces, channels)
+
+    for channel in channels:
+        channel.turn_off()
 
 
 sys.exit(main())
