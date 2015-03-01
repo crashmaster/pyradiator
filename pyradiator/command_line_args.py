@@ -99,7 +99,7 @@ def parse_arguments(display_info):
     parser.add_argument(
         "--static-fg-color",
         action=StoreColor,
-        default=WHITE,
+        default=GRAY,
         choices=COLORS.keys(),
         help="Foreground color of the no-signal static noise."
     )
