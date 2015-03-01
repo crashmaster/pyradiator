@@ -1,12 +1,16 @@
 import pygame
 
 
-def create_font(args, font_size=None):
-    if args.font in pygame.font.get_fonts():
-        return pygame.font.SysFont(args.font,
-                                   font_size if font_size else args.font_size,
-                                   args.font_bold,
-                                   args.font_italic)
+def create_font(config, font_size=None):
+    if config.font in pygame.font.get_fonts():
+        return pygame.font.SysFont(
+            config.font,
+            font_size if font_size else config.font_size,
+            config.font_bold,
+            config.font_italic
+        )
     else:
-        return pygame.font.Font(args.font,
-                                args.font_size)
+        return pygame.font.Font(
+            config.font,
+            config.font_size
+        )

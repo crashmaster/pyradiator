@@ -35,43 +35,43 @@ def get_display_info():
     return display_info
 
 
-def create_main_surface(args):
+def create_main_surface(config):
     pygame.display.set_caption("PyRadiator by Crashmaster")
-    resolution = (args.window_width, args.window_height)
+    resolution = (config.window_width, config.window_height)
     flags = pygame.DOUBLEBUF | pygame.HWSURFACE
-    if args.fullscreen:
+    if config.fullscreen:
         flags |= pygame.FULLSCREEN
         LOGGER.debug("Fullscreen mode enabled")
     main_surface = pygame.display.set_mode(resolution, flags)
-    main_surface.fill(args.main_surface_color)
+    main_surface.fill(config.main_surface_color)
     LOGGER.debug("Main surface with resolution: {} created".
                  format(resolution))
     return main_surface
 
 
-def create_sub_surface(args, main_surface, x, y, width, height):
+def create_sub_surface(config, main_surface, x, y, width, height):
     sub_surface = main_surface.subsurface((x, y, width, height))
-    sub_surface.fill(args.sub_surface_color)
+    sub_surface.fill(config.sub_surface_color)
     LOGGER.debug("Sub surface with resolution: {} @ {} created".
                  format((width, height), (x, y)))
     return sub_surface
 
 
-def create_sub_surfaces(args, main_surface):
-    quarter_width = int(args.window_width / 2)
-    quarter_height = int(args.window_height / 2)
+def create_sub_surfaces(config, main_surface):
+    quarter_width = int(config.window_width / 2)
+    quarter_height = int(config.window_height / 2)
     return [
-        create_sub_surface(args, main_surface,
-                           args.margin_size + i * quarter_width,
-                           args.margin_size + j * quarter_height,
-                           quarter_width - (2 * args.margin_size),
-                           quarter_height - (2 * args.margin_size))
+        create_sub_surface(config, main_surface,
+                           config.margin_size + i * quarter_width,
+                           config.margin_size + j * quarter_height,
+                           quarter_width - (2 * config.margin_size),
+                           quarter_height - (2 * config.margin_size))
         for i in range(2) for j in range(2)
     ]
 
 
-def loop(args, subsurfaces, channels):
-    fps = 50
+def loop(config, subsurfaces, channels):
+    fps = 60
     display_refresh = pygame.USEREVENT
     pygame.time.set_timer(display_refresh, int(1000.0 / fps))
     running = True
@@ -103,7 +103,8 @@ def execute_simple_command(command):
 
 
 def execute_compound_command(command_1, command_2):
-    process_1 = subprocess.Popen(command_1, stdout=subprocess.PIPE)
+    process_1 = subprocess.Popen(command_1,
+                                 stdout=subprocess.PIPE)
     process_2 = subprocess.Popen(command_2,
                                  stdin=process_1.stdout,
                                  stdout=subprocess.PIPE,
@@ -148,88 +149,102 @@ class AskFinger(object):
 
 class PrintText(object):
 
-    def __init__(self, args, surface, font_size=None):
-        self.args = args
+    def __init__(self, config, surface, position, font):
+        self.config = config
         self.surface = surface
-        self.font = create_font(args, font_size)
+        self.position = position
+        self.font = font
         self.font_antialias = True
-        self.text_y_offset = self.__get_text_y_offset(font_size)
+        self.text_y_offset = math.ceil(self.font.get_height() * 1.05)
 
     def __call__(self, lines_to_print):
         if not lines_to_print:
             return
 
-        self.surface.fill(self.args.sub_surface_color)
-        offset = 0
+        self.surface.fill(self.config.sub_surface_color)
+        position_x = self.position[0]
+        position_y = self.position[1]
         for line in lines_to_print:
             rendered_line = self.font.render(line,
                                              self.font_antialias,
-                                             self.args.font_fg_color,
-                                             self.args.font_bg_color)
-            self.surface.blit(rendered_line, (0, offset))
-            offset += self.text_y_offset
+                                             self.config.font_fg_color)
+            self.surface.blit(rendered_line, (position_x, position_y))
+            position_y += self.text_y_offset
 
-    def __get_text_y_offset(self, font_size):
-        return math.ceil(
-            (font_size if font_size else self.args.font_size) * 1.25
-        )
+
+def print_loading_screen(config, surface):
+    text = "LOADING..."
+    text_font = create_font(config, 50)
+    text_size = text_font.size(text)
+    text_position = ((config.window_width/2)-(text_size[0]/2),
+                     (config.window_height/2)-(text_size[1]/2))
+    PrintText(config, surface, text_position, text_font)([text])
+    pygame.display.flip()
 
 
 def main():
     initialize_pygame_modules()
     display_info = get_display_info()
-    args = command_line_args.parse_arguments(display_info)
+    config = command_line_args.parse_arguments(display_info)
 
-    main_surface = create_main_surface(args)
-    subsurfaces = create_sub_surfaces(args, main_surface)
+    main_surface = create_main_surface(config)
+    subsurfaces = create_sub_surfaces(config, main_surface)
+
+    print_loading_screen(config, main_surface)
 
     channels = [
         RadiatorChannel(
-            args=args,
-            name="Channel top",
+            config=config,
+            name="top",
             surface=subsurfaces[0],
             input_functor=AskTop(),
-            output_functor=PrintText(args=args,
+            output_functor=PrintText(config=config,
                                      surface=subsurfaces[0],
-                                     font_size=16),
+                                     position=(0, 0),
+                                     font=create_font(config, 16)),
             update_period=5
         ),
         RadiatorChannel(
-            args=args,
-            name="Channel cowsay",
+            config=config,
+            name="cowsay",
             surface=subsurfaces[1],
             input_functor=AskTheCow(),
-            output_functor=PrintText(args=args,
+            output_functor=PrintText(config=config,
                                      surface=subsurfaces[1],
-                                     font_size=26),
+                                     position=(0, 0),
+                                     font=create_font(config, 26)),
             update_period=10
         ),
         RadiatorChannel(
-            args=args,
-            name="Channel w",
+            config=config,
+            name="w",
             surface=subsurfaces[2],
             input_functor=AskW(),
-            output_functor=PrintText(args=args,
+            output_functor=PrintText(config=config,
                                      surface=subsurfaces[2],
-                                     font_size=16),
+                                     position=(0, 0),
+                                     font=create_font(config, 16)),
             update_period=15
         ),
         RadiatorChannel(
-            args=args,
-            name="Channel finger",
+            config=config,
+            name="finger",
             surface=subsurfaces[3],
             input_functor=AskFinger(),
-            output_functor=PrintText(args=args,
+            output_functor=PrintText(config=config,
                                      surface=subsurfaces[3],
-                                     font_size=16),
+                                     position=(0, 0),
+                                     font=create_font(config, 16)),
             update_period=20
         )
     ]
 
+    main_surface.fill(config.main_surface_color)
+
     for channel in channels:
         channel.turn_on()
 
-    loop(args, subsurfaces, channels)
+    loop(config, subsurfaces, channels)
 
     for channel in channels:
         channel.turn_off()

@@ -12,14 +12,14 @@ from endpoint import Consumer
 RRR = random.randrange
 
 
-def create_static_surface(args, surface):
+def create_static_surface(config, surface):
     (width, height) = surface.get_size()
     static_width = width + 60
     static_height = height + 60
     static = pygame.Surface((static_width, static_height))
     colors = (
-        static.map_rgb(args.static_bg_color),
-        static.map_rgb(args.static_fg_color)
+        static.map_rgb(config.static_bg_color),
+        static.map_rgb(config.static_fg_color)
     )
     random_choice = random.choice
     set_pixel_color_at = static.set_at
@@ -30,10 +30,10 @@ def create_static_surface(args, surface):
     return static
 
 
-def create_no_signal_overlay(args, channel_name):
-    font = create_font(args, 24)
-    text = "{}: {}.".format(channel_name, "No signal")
-    no_signal = font.render(text, 1, args.font_fg_color)
+def create_no_signal_overlay(config, channel_name):
+    font = create_font(config, 24)
+    text = "Channel '{}': {}.".format(channel_name, "No signal")
+    no_signal = font.render(text, 1, config.font_fg_color)
     overlay = pygame.Surface(tuple(x + 5 for x in font.size(text)), pygame.SRCALPHA)
     overlay.fill((30, 30, 30, 200))
     overlay.blit(no_signal, (5, 0))
@@ -41,10 +41,10 @@ def create_no_signal_overlay(args, channel_name):
 
 
 class RadiatorChannel(object):
-    def __init__(self, args, name, surface, input_functor, output_functor, update_period):
+    def __init__(self, config, name, surface, input_functor, output_functor, update_period):
         self.surface = surface
-        self.static = create_static_surface(args, self.surface)
-        self.overlay = create_no_signal_overlay(args, name)
+        self.static = create_static_surface(config, self.surface)
+        self.overlay = create_no_signal_overlay(config, name)
         self.dispatcher = Dispatcher()
         self.producer = Producer(update_period,
                                  self.dispatcher.input_queue,
