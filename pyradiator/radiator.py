@@ -1,17 +1,17 @@
 import logging
-import math
 import os
 import random
-import subprocess
 import sys
 
 import pygame
 
-import command_line_args
 from common import create_font
+from common import execute_simple_command
+from common import execute_compound_command
+from common import print_loading_screen
+from common import PrintText
+from command_line_args import parse_arguments
 from radiator_channel import RadiatorChannel
-
-PY3K = sys.version_info >= (3, 0)
 
 
 IS_HELP_MODE = any(x in sys.argv for x in ["-h", "--help", "list"])
@@ -27,6 +27,13 @@ def initialize_pygame_modules():
     LOGGER.debug("pygame.display module initialized")
     pygame.font.init()
     LOGGER.debug("pygame.font module initialized")
+
+
+def disable_mouse_events():
+    pygame.event.set_blocked(pygame.MOUSEMOTION)
+    pygame.event.set_blocked(pygame.MOUSEBUTTONUP)
+    pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
+    LOGGER.debug("Mouse-events disabled")
 
 
 def get_display_info():
@@ -71,9 +78,8 @@ def create_sub_surfaces(config, main_surface):
 
 
 def loop(config, subsurfaces, channels):
-    fps = 60
     display_refresh = pygame.USEREVENT
-    pygame.time.set_timer(display_refresh, int(1000.0 / fps))
+    pygame.time.set_timer(display_refresh, int(1000.0 / config.fps))
     running = True
     while running:
         for event in pygame.event.get():
@@ -86,34 +92,6 @@ def loop(config, subsurfaces, channels):
                     channel.display_static()
 
         pygame.time.wait(0)
-
-
-def execute_simple_command(command):
-    try:
-        proc = subprocess.Popen(command,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-    except OSError:
-        return
-    else:
-        if PY3K:
-            return proc.communicate()[0].decode().split("\n")
-        else:
-            return proc.communicate()[0].split("\n")
-
-
-def execute_compound_command(command_1, command_2):
-    process_1 = subprocess.Popen(command_1,
-                                 stdout=subprocess.PIPE)
-    process_2 = subprocess.Popen(command_2,
-                                 stdin=process_1.stdout,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
-    process_1.stdout.close()
-    if PY3K:
-        return process_2.communicate()[0].decode().split("\n")
-    else:
-        return process_2.communicate()[0].split("\n")
 
 
 class AskTheCow(object):
@@ -147,45 +125,11 @@ class AskFinger(object):
         return execute_simple_command(["finger", os.getlogin()])
 
 
-class PrintText(object):
-
-    def __init__(self, config, surface, position, font):
-        self.config = config
-        self.surface = surface
-        self.position = position
-        self.font = font
-        self.font_antialias = True
-        self.text_y_offset = math.ceil(self.font.get_height() * 1.05)
-
-    def __call__(self, lines_to_print):
-        if not lines_to_print:
-            return
-
-        self.surface.fill(self.config.sub_surface_color)
-        position_x = self.position[0]
-        position_y = self.position[1]
-        for line in lines_to_print:
-            rendered_line = self.font.render(line,
-                                             self.font_antialias,
-                                             self.config.font_fg_color)
-            self.surface.blit(rendered_line, (position_x, position_y))
-            position_y += self.text_y_offset
-
-
-def print_loading_screen(config, surface):
-    text = "LOADING..."
-    text_font = create_font(config, 50)
-    text_size = text_font.size(text)
-    text_position = ((config.window_width/2)-(text_size[0]/2),
-                     (config.window_height/2)-(text_size[1]/2))
-    PrintText(config, surface, text_position, text_font)([text])
-    pygame.display.flip()
-
-
 def main():
     initialize_pygame_modules()
+    disable_mouse_events()
     display_info = get_display_info()
-    config = command_line_args.parse_arguments(display_info)
+    config = parse_arguments(display_info)
 
     main_surface = create_main_surface(config)
     subsurfaces = create_sub_surfaces(config, main_surface)

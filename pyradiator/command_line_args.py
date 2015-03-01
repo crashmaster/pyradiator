@@ -6,12 +6,20 @@ import pygame
 
 
 BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
 GRAY = (180, 180, 180)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
 COLORS = collections.OrderedDict([
-    ("white", WHITE),
     ("black", BLACK),
+    ("blue", BLUE),
     ("gray", GRAY),
+    ("green", GREEN),
+    ("red", RED),
+    ("white", WHITE),
+    ("yellow", YELLOW),
 ])
 
 
@@ -52,6 +60,12 @@ def parse_arguments(display_info):
     parser = argparse.ArgumentParser(
         description="THE Radiator.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "--fps",
+        type=int,
+        default=60,
+        help="Expected frames per second for the radiator."
+    )
     parser.add_argument(
         "--fullscreen",
         action="store_true",
@@ -148,5 +162,11 @@ def parse_arguments(display_info):
         default=BLACK,
         choices=COLORS.keys(),
         help="Background color of the fonts."
+    )
+    parser.add_argument(
+        "--font-antialias",
+        action="store_true",
+        default=True,
+        help="Font of the output text is antialiased."
     )
     return parser.parse_args()
