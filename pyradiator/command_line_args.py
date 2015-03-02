@@ -165,8 +165,9 @@ def parse_arguments(display_info):
     )
     parser.add_argument(
         "--font-antialias",
-        action="store_true",
-        default=True,
+        type=int,
+        choices=[0, 1],
+        default=1,
         help="Font of the output text is antialiased."
     )
     return parser.parse_args()
