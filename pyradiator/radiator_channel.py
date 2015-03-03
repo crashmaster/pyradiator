@@ -1,4 +1,3 @@
-import math
 import random
 
 import pygame
@@ -49,8 +48,7 @@ class RadiatorChannel(object):
         self.producer = Producer(update_period,
                                  self.dispatcher.input_queue,
                                  input_functor)
-        self.consumer = Consumer(math.ceil(update_period / 4),
-                                 self.dispatcher.output_queue,
+        self.consumer = Consumer(self.dispatcher.output_queue,
                                  output_functor)
 
     def turn_on(self):

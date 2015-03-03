@@ -18,9 +18,8 @@ class Dispatcher(object):
         self.input_queue.close()
         self.output_queue.close()
         self.__process.join()
-        self.__process.terminate()
 
     def __worker(self):
-        for function, args in iter(self.input_queue.get, self.STOP_SENTINEL):
-            result = function(*args)
+        for function in iter(self.input_queue.get, self.STOP_SENTINEL):
+            result = function()
             self.output_queue.put(result)

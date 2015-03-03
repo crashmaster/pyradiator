@@ -1,63 +1,53 @@
-import abc
 import queue
 import threading
 
-import six
 
+class Producer(object):
 
-@six.add_metaclass(abc.ABCMeta)
-class Endpoint(object):
-
-    def __init__(self, period_in_seconds, queue, function, *args):
+    def __init__(self, period_in_seconds, queue, function):
         self._period_in_seconds = period_in_seconds
         self._queue = queue
         self._function = function
-        self._args = args
         self._event = threading.Event()
-        self.__thread = threading.Thread(target=self._loop)
+        self._thread = threading.Thread(target=self._loop)
 
     def start(self):
-        self.__thread.start()
+        self._thread.start()
 
     def stop(self):
         self._event.set()
-        self.__thread.join()
-
-    @abc.abstractmethod
-    def _loop(self):
-        pass
-
-
-class Producer(Endpoint):
+        self._thread.join()
 
     def _loop(self):
-#       self.__put_item_into_the_queue()
         while not self._event.wait(self._period_in_seconds):
             self.__put_item_into_the_queue()
 
     def __put_item_into_the_queue(self):
         try:
-            self._queue.put((self._function, self._args))
+            self._queue.put(self._function)
         except queue.Full:
             pass
 
 
-class Consumer(Endpoint):
+class Consumer(object):
 
-    def __init__(self, period_in_seconds, queue, function, *args):
-        super(Consumer, self).__init__(period_in_seconds, queue, function, *args)
+    STOP_SENTINEL = "STOP"
+
+    def __init__(self, queue, function):
+        self._queue = queue
+        self._function = function
+        self._thread = threading.Thread(target=self._loop)
         self.no_date_from_the_queue = True
 
-    def _loop(self):
-#       self.__get_item_out_of_the_queue()
-        while not self._event.wait(self._period_in_seconds):
-            self.__get_item_out_of_the_queue()
+    def start(self):
+        self._thread.start()
 
-    def __get_item_out_of_the_queue(self):
-        try:
-            result = self._queue.get(block=False)
+    def stop(self):
+        self._queue.put(self.STOP_SENTINEL)
+        self._thread.join()
+
+    def _loop(self):
+        for result in iter(self._queue.get, self.STOP_SENTINEL):
             self.no_date_from_the_queue = result is None
-        except queue.Empty:
-            return
-        else:
-            self._function(result, *self._args)
+            if result:
+                self._function(result)
