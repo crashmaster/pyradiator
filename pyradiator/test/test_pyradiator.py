@@ -8,11 +8,19 @@ from endpoint import Producer
 
 
 PRODUCER_WAKE_UP_TIME = 2
-CONSUMER_WAKE_UP_TIME = PRODUCER_WAKE_UP_TIME / 2
 
 
-def multiply(a, b):
-    return "@{} -> {} * {} = {}".format(datetime.now(), a, b, a * b)
+class Multiply(object):
+
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
+    def __call__(self):
+        return "@{} -> {} * {} = {}".format(datetime.now(),
+                                            self.a,
+                                            self.b,
+                                            self.a * self.b)
 
 
 def print_tabbed(string):
@@ -23,11 +31,8 @@ def main():
     dispatcher = Dispatcher()
     producer = Producer(PRODUCER_WAKE_UP_TIME,
                         dispatcher.input_queue,
-                        multiply,
-                        randrange(3, 6),
-                        randrange(7, 12))
-    consumer = Consumer(CONSUMER_WAKE_UP_TIME,
-                        dispatcher.output_queue,
+                        Multiply(randrange(3, 6), randrange(7, 12)))
+    consumer = Consumer(dispatcher.output_queue,
                         print_tabbed)
 
     def start_stuff():
