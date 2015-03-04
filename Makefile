@@ -33,5 +33,5 @@ clear:
 	@rm -rf $(PACKAGE_DIR)
 
 build: clear
-	@$(PYTHON3) setup.py --quiet sdist --dist-dir $(PACKAGE_DIR)
+	@$(PYTHON2) setup.py --quiet sdist --dist-dir $(PACKAGE_DIR)
 	@find $(PACKAGE_DIR) -name '*.tar.gz'
