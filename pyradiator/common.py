@@ -15,9 +15,9 @@ def _execute_command(function, *args, **kwargs):
         return
     else:
         if PY3K:
-            return process.communicate()[0].decode().split("\n")
+            return process.communicate()[0].decode().splitlines()
         else:
-            return process.communicate()[0].split("\n")
+            return process.communicate()[0].splitlines()
 
 
 def execute_simple_command(command):
