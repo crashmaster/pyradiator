@@ -170,4 +170,18 @@ def parse_arguments(display_info):
         default=1,
         help="Font of the output text is antialiased."
     )
+    parser.add_argument(
+        "--number-of-rows",
+        type=int,
+        choices=[1, 2, 3, 4],
+        default=2,
+        help="Number of channel rows."
+    )
+    parser.add_argument(
+        "--number-of-columns",
+        type=int,
+        choices=[1, 2, 3, 4],
+        default=2,
+        help="Number of channel columns."
+    )
     return parser.parse_args()

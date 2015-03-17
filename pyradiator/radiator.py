@@ -65,15 +65,17 @@ def create_sub_surface(config, main_surface, x, y, width, height):
 
 
 def create_sub_surfaces(config, main_surface):
-    quarter_width = int(config.window_width / 2)
-    quarter_height = int(config.window_height / 2)
+    rows = config.number_of_rows
+    columns = config.number_of_columns
+    quarter_width = int(config.window_width / rows)
+    quarter_height = int(config.window_height / columns)
     return [
         create_sub_surface(config, main_surface,
-                           config.margin_size + i * quarter_width,
-                           config.margin_size + j * quarter_height,
+                           config.margin_size + row * quarter_width,
+                           config.margin_size + column * quarter_height,
                            quarter_width - (2 * config.margin_size),
                            quarter_height - (2 * config.margin_size))
-        for i in range(2) for j in range(2)
+        for row in range(rows) for column in range(columns)
     ]
 
 
@@ -136,52 +138,25 @@ def main():
 
     print_loading_screen(config, main_surface)
 
-    channels = [
-        RadiatorChannel(
-            config=config,
-            name="top",
-            surface=subsurfaces[0],
-            input_functor=AskTop(),
-            output_functor=PrintText(config=config,
-                                     surface=subsurfaces[0],
-                                     position=(0, 0),
-                                     font=create_font(config, 16)),
-            update_period=5
-        ),
-        RadiatorChannel(
-            config=config,
-            name="cowsay",
-            surface=subsurfaces[1],
-            input_functor=AskTheCow(),
-            output_functor=PrintText(config=config,
-                                     surface=subsurfaces[1],
-                                     position=(0, 0),
-                                     font=create_font(config, 26)),
-            update_period=10
-        ),
-        RadiatorChannel(
-            config=config,
-            name="w",
-            surface=subsurfaces[2],
-            input_functor=AskW(),
-            output_functor=PrintText(config=config,
-                                     surface=subsurfaces[2],
-                                     position=(0, 0),
-                                     font=create_font(config, 16)),
-            update_period=15
-        ),
-        RadiatorChannel(
-            config=config,
-            name="finger",
-            surface=subsurfaces[3],
-            input_functor=AskFinger(),
-            output_functor=PrintText(config=config,
-                                     surface=subsurfaces[3],
-                                     position=(0, 0),
-                                     font=create_font(config, 16)),
-            update_period=20
-        )
+    boo = [
+        ("top", AskTop, 5),
+        ("cowsay", AskTheCow, 10),
+        ("w", AskW, 15),
+        ("finger", AskFinger, 20),
     ]
+    channels = []
+    for i in range(config.number_of_rows * config.number_of_columns):
+        tmp = random.choice(boo)
+        print(tmp)
+        channels.append(RadiatorChannel(config=config,
+                                        name=tmp[0],
+                                        surface=subsurfaces[i],
+                                        input_functor=tmp[1](),
+                                        output_functor=PrintText(config=config,
+                                                                 surface=subsurfaces[i],
+                                                                 position=(0, 0),
+                                                                 font=create_font(config)),
+                                        update_period=tmp[2]))
 
     main_surface.fill(config.main_surface_color)
 
