@@ -65,18 +65,28 @@ def create_sub_surface(config, main_surface, x, y, width, height):
 
 
 def create_sub_surfaces(config, main_surface):
-    rows = config.number_of_rows
-    columns = config.number_of_columns
-    quarter_width = int(config.window_width / rows)
-    quarter_height = int(config.window_height / columns)
-    return [
-        create_sub_surface(config, main_surface,
-                           config.margin_size + row * quarter_width,
-                           config.margin_size + column * quarter_height,
-                           quarter_width - (2 * config.margin_size),
-                           quarter_height - (2 * config.margin_size))
-        for row in range(rows) for column in range(columns)
-    ]
+    if config.number_of_left_rows == 0 and config.number_of_right_rows == 0:
+        raise RuntimeError("number_of_left_rows == number_of_right_rows == 0")
+
+    rows = []
+    if config.number_of_left_rows > 0:
+        rows.append(config.number_of_left_rows)
+    if config.number_of_right_rows > 0:
+        rows.append(config.number_of_right_rows)
+    surface_width = int(config.window_width / len(rows))
+
+    surfaces = []
+    for i in range(len(rows)):
+        for j in range(rows[i]):
+            surface_height = int(config.window_height / rows[i])
+            surfaces.append(create_sub_surface(
+                config,
+                main_surface,
+                config.margin_size + i * surface_width,
+                config.margin_size + j * surface_height,
+                surface_width - (2 * config.margin_size),
+                surface_height - (2 * config.margin_size)))
+    return surfaces
 
 
 def loop(config, subsurfaces, channels):
@@ -139,15 +149,14 @@ def main():
     print_loading_screen(config, main_surface)
 
     boo = [
-        ("top", AskTop, 5),
-        ("cowsay", AskTheCow, 10),
-        ("w", AskW, 15),
-        ("finger", AskFinger, 20),
+        ("top", AskTop, 10),
+        ("cowsay", AskTheCow, 15),
+        ("w", AskW, 20),
+        ("finger", AskFinger, 25),
     ]
     channels = []
-    for i in range(config.number_of_rows * config.number_of_columns):
+    for i in range(config.number_of_left_rows + config.number_of_right_rows):
         tmp = random.choice(boo)
-        print(tmp)
         channels.append(RadiatorChannel(config=config,
                                         name=tmp[0],
                                         surface=subsurfaces[i],

@@ -171,17 +171,17 @@ def parse_arguments(display_info):
         help="Font of the output text is antialiased."
     )
     parser.add_argument(
-        "--number-of-rows",
+        "--number-of-left-rows",
         type=int,
-        choices=[1, 2, 3, 4],
+        choices=[0, 1, 2, 3, 4],
         default=2,
-        help="Number of channel rows."
+        help="Number of rows on the left side."
     )
     parser.add_argument(
-        "--number-of-columns",
+        "--number-of-right-rows",
         type=int,
-        choices=[1, 2, 3, 4],
+        choices=[0, 1, 2, 3, 4],
         default=2,
-        help="Number of channel columns."
+        help="Number of rows on the right side."
     )
     return parser.parse_args()
