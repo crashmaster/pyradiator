@@ -85,7 +85,7 @@ class PrintText(object):
 
 def print_loading_screen(config, surface):
     text = "LOADING..."
-    text_font = create_font(config, math.ceil(config.window_height*0.1))
+    text_font = create_font(config, int(math.ceil(config.window_height*0.1)))
     text_size = text_font.size(text)
     text_position = ((config.window_width/2)-(text_size[0]/2),
                      (config.window_height/2)-(text_size[1]/2))
