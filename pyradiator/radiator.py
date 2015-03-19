@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import signal
 import sys
 
 import pygame
@@ -15,11 +16,20 @@ from radiator_channel import RadiatorChannel
 
 
 IS_HELP_MODE = any(x in sys.argv for x in ["-h", "--help", "list"])
+
 LOG_LEVEL = logging.ERROR if IS_HELP_MODE else logging.DEBUG
 FORMAT = "%(asctime)-15s %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=FORMAT, level=LOG_LEVEL)
-
 LOGGER = logging.getLogger("radiator")
+
+RUNNING = True
+
+
+def stop(signal=None, frame=None):
+    global RUNNING
+    RUNNING = False
+
+signal.signal(signal.SIGINT, stop)
 
 
 def initialize_pygame_modules():
@@ -92,11 +102,10 @@ def create_sub_surfaces(config, main_surface):
 def loop(config, subsurfaces, channels):
     display_refresh = pygame.USEREVENT
     pygame.time.set_timer(display_refresh, int(1000.0 / config.fps))
-    running = True
-    while running:
+    while RUNNING:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                running = False
+                stop()
             elif event.type == display_refresh:
                 pygame.display.flip()
             for channel in channels:
