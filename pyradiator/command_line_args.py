@@ -61,6 +61,12 @@ def parse_arguments(display_info):
         description="THE Radiator.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
+        "--title",
+        type=str,
+        default="PyRadiator by Crashmaster",
+        help="Title of the radiator window."
+    )
+    parser.add_argument(
         "--fps",
         type=int,
         default=60,

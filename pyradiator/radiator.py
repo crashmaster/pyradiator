@@ -46,7 +46,7 @@ def get_display_info():
 
 
 def create_main_surface(config):
-    pygame.display.set_caption("PyRadiator by Crashmaster")
+    pygame.display.set_caption(config.title)
     resolution = (config.window_width, config.window_height)
     flags = pygame.DOUBLEBUF | pygame.HWSURFACE
     if config.fullscreen:
