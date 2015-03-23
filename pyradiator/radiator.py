@@ -1,18 +1,19 @@
 import contextlib
 import logging
-import os
 import random
 import sys
 
 import pygame
 
 from app_state import ApplicationState
-from common import create_font
-from common import execute_simple_command
-from common import execute_compound_command
-from common import print_loading_screen
-from common import PrintText
+from built_in_content_provider import AskFinger
+from built_in_content_provider import AskTheCow
+from built_in_content_provider import AskTop
+from built_in_content_provider import AskW
 from command_line_args import parse_arguments
+from common import PrintText
+from common import create_font
+from common import print_loading_screen
 from radiator_channel import RadiatorChannel
 
 
@@ -112,37 +113,6 @@ def loop(application_state, config, subsurfaces, channels):
                     channel.display_static()
 
         pygame.time.wait(0)
-
-
-class AskTheCow(object):
-
-    def __init__(self):
-        self.cows = ["-b", "-d", "-g", "-p", "-s", "-t", "-w", "-y"]
-
-    def __call__(self):
-        return execute_compound_command(
-            ["fortune", "-s"], ["cowsay", random.choice(self.cows)]
-        )
-
-
-class AskTop(object):
-
-    def __call__(self):
-        return execute_simple_command(
-            ["top", "-H", "-b", "-n1", "-p", str(os.getppid())]
-        )
-
-
-class AskW(object):
-
-    def __call__(self):
-        return execute_simple_command(["w", "-s"])
-
-
-class AskFinger(object):
-
-    def __call__(self):
-        return execute_simple_command(["finger", os.getlogin()])
 
 
 def create_channels(config, subsurfaces):
