@@ -116,7 +116,7 @@ def loop(application_state, config, subsurfaces, channels):
 
 
 def create_channels(config, subsurfaces):
-    boo = [
+    shows = [
         ("top", AskTop, 10),
         ("cowsay", AskTheCow, 15),
         ("w", AskW, 20),
@@ -124,16 +124,17 @@ def create_channels(config, subsurfaces):
     ]
     channels = []
     for i in range(config.number_of_left_rows + config.number_of_right_rows):
-        tmp = random.choice(boo)
-        channels.append(RadiatorChannel(config=config,
-                                        name=tmp[0],
-                                        surface=subsurfaces[i],
-                                        input_functor=tmp[1](),
-                                        output_functor=PrintText(config=config,
-                                                                 surface=subsurfaces[i],
-                                                                 position=(0, 0),
-                                                                 font=create_font(config)),
-                                        update_period=tmp[2]))
+        show = random.choice(shows)
+        channels.append(
+            RadiatorChannel(config=config,
+                            name=show[0],
+                            surface=subsurfaces[i],
+                            input_functor=show[1](),
+                            output_functor=PrintText(config=config,
+                                                     surface=subsurfaces[i],
+                                                     position=(0, 0),
+                                                     font=create_font(config)),
+                            update_period=show[2]))
     return channels
 
 
