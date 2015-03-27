@@ -116,9 +116,9 @@ def loop(application_state, config, subsurfaces, channels):
 def create_channels(config, subsurfaces):
     shows = [
         ("top", AskTop, {}, 10),
-        ("cowsay", AskTheCow, {}, 15),
-        ("w", AskW, {}, 20),
-        ("finger", AskFinger, {}, 25),
+        ("cowsay", AskTheCow, {}, 11),
+        ("w", AskW, {}, 12),
+        ("finger", AskFinger, {}, 13),
     ]
     channels = []
     for i in range(config.number_of_left_rows + config.number_of_right_rows):
