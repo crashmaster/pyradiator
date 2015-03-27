@@ -1,3 +1,4 @@
+import os
 import contextlib
 import logging
 import random
@@ -118,7 +119,7 @@ def create_channels(config, subsurfaces):
         ("top", AskTop, {}, 10),
         ("cowsay", AskTheCow, {}, 11),
         ("w", AskW, {}, 12),
-        ("finger", AskFinger, {}, 13),
+        ("finger", AskFinger, {"login_name": os.getlogin()}, 13),
     ]
     channels = []
     for i in range(config.number_of_left_rows + config.number_of_right_rows):

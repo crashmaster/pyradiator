@@ -18,7 +18,7 @@ def get_job_info(jenkins_url, job_name):
     job_info = get_last_job_info(job_summary)
     return (
         job_summary["name"],
-        "BUILDING" if job_info["result"] is None and job_info["building"] else job_info["result"],
+        get_job_status(job_info),
         get_job_eta(job_info)
     )
 
@@ -29,6 +29,13 @@ def get_job_summary(jenkins_url, job_name):
 
 def get_last_job_info(job_summary):
     return requests.get(job_summary["builds"][0]["url"] + JSON_API_URL).json()
+
+
+def get_job_status(job_info):
+    if job_info["result"] is None and job_info["building"]:
+        return "BUILDING"
+    else:
+        return job_info["result"],
 
 
 def get_job_eta(job):
@@ -60,26 +67,33 @@ def get_formatted_percent(start_time, duration):
 
 class AskJenkinsJobStatus(object):
 
+    COLUMN_1 = "Jenkins Job Name                     "
+    COLUMN_2 = " Status "
+    COLUMN_3 = "     E.T.A.     "
+
     def __init__(self, jobs):
         self.jobs = jobs
         self.success_pattern = re.compile("(.*)(SUCCESS)(.*)")
         self.failure_pattern = re.compile("(.*)(FAILURE)(.*)")
         self.unstable_pattern = re.compile("(.*)(UNSTABLE)(.*)")
         self.building_pattern = re.compile("(.*)(BUILDING)(.*)")
+        self.table = prettytable.PrettyTable([
+            self.COLUMN_1,
+            self.COLUMN_2,
+            self.COLUMN_3
+        ])
+        self.table.align[self.COLUMN_1] = "l"
 
     def __call__(self):
-        COLUMN_1 = "Jenkins Job Name                     "
-        COLUMN_2 = " Status "
-        COLUMN_3 = "     E.T.A.     "
-
-        table = prettytable.PrettyTable([COLUMN_1, COLUMN_2, COLUMN_3])
-        table.align[COLUMN_1] = "l"
-
-        for job_name in self.jobs.job_names:
-            table.add_row(get_job_info(self.jobs.url, job_name))
+        self.table.clear_rows()
+        try:
+            for job_name in self.jobs.job_names:
+                self.table.add_row(get_job_info(self.jobs.url, job_name))
+        except Exception:
+            return []
 
         text = []
-        for line in table.get_string().splitlines():
+        for line in self.table.get_string().splitlines():
             hit = self.success_pattern.match(line)
             if hit:
                 text.append([ColoredString(hit.group(1)),
@@ -101,7 +115,7 @@ class AskJenkinsJobStatus(object):
             hit = self.building_pattern.match(line)
             if hit:
                 text.append([ColoredString(hit.group(1)),
-                             ColoredString(hit.group(2), (0, 0, 255)),
+                             ColoredString(hit.group(2), (70, 120, 255)),
                              ColoredString(hit.group(3))])
                 continue
             text.append([ColoredString(line)])
