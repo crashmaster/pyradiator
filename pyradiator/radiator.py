@@ -115,10 +115,10 @@ def loop(application_state, config, subsurfaces, channels):
 
 def create_channels(config, subsurfaces):
     shows = [
-        ("top", AskTop, 10),
-        ("cowsay", AskTheCow, 15),
-        ("w", AskW, 20),
-        ("finger", AskFinger, 25),
+        ("top", AskTop, {}, 10),
+        ("cowsay", AskTheCow, {}, 15),
+        ("w", AskW, {}, 20),
+        ("finger", AskFinger, {}, 25),
     ]
     channels = []
     for i in range(config.number_of_left_rows + config.number_of_right_rows):
@@ -127,12 +127,12 @@ def create_channels(config, subsurfaces):
             RadiatorChannel(config=config,
                             name=show[0],
                             surface=subsurfaces[i],
-                            input_functor=show[1](),
+                            input_functor=show[1](**show[2]),
                             output_functor=PrintText(config=config,
                                                      surface=subsurfaces[i],
                                                      position=(0, 0),
                                                      font=create_font(config)),
-                            update_period=show[2]))
+                            update_period=show[3]))
     return channels
 
 
