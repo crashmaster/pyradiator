@@ -53,7 +53,6 @@ def create_main_surface(config):
         flags |= pygame.FULLSCREEN
         LOGGER.debug("Fullscreen mode enabled")
     main_surface = pygame.display.set_mode(resolution, flags)
-    main_surface.fill(config.main_surface_color)
     LOGGER.debug("Main surface with resolution: {} created".
                  format(resolution))
     return main_surface
@@ -73,7 +72,6 @@ def get_rows_per_column(config):
 
 def create_sub_surface(config, main_surface, x, y, width, height):
     sub_surface = main_surface.subsurface((x, y, width, height))
-    sub_surface.fill(config.sub_surface_color)
     LOGGER.debug("Sub surface with resolution: {} @ {} created".
                  format((width, height), (x, y)))
     return sub_surface
@@ -160,6 +158,7 @@ def main():
     subsurfaces = create_sub_surfaces(config, main_surface)
 
     print_loading_screen(config, main_surface)
+    main_surface.fill(config.main_surface_color)
 
     channels = create_channels(config, subsurfaces)
 

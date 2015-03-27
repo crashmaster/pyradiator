@@ -59,6 +59,13 @@ def create_font(config, font_size=None):
         )
 
 
+class ColoredString(object):
+
+    def __init__(self, text, color=(255, 255, 255)):
+        self.text = text
+        self.color = color
+
+
 class PrintText(object):
 
     def __init__(self, config, surface, position, font):
@@ -75,19 +82,33 @@ class PrintText(object):
         self.surface.fill(self.config.sub_surface_color)
         position_x = self.position[0]
         position_y = self.position[1]
+        text_surface = self.surface.copy()
         for line in lines_to_print:
-            rendered_line = self.font.render(line,
-                                             self.config.font_antialias,
-                                             self.config.font_fg_color)
-            self.surface.blit(rendered_line, (position_x, position_y))
+            for line_part in line:
+                rendered_text = self.font.render(line_part.text,
+                                                 self.config.font_antialias,
+                                                 line_part.color)
+                text_surface.blit(rendered_text, (position_x, position_y))
+                position_x += rendered_text.get_width()
             position_y += self.text_y_offset
+            position_x = self.position[0]
+        self.surface.blit(text_surface, (0, 0))
 
 
 def print_loading_screen(config, surface):
-    text = "LOADING..."
-    text_font = create_font(config, int(math.ceil(config.window_height*0.1)))
-    text_size = text_font.size(text)
-    text_position = ((config.window_width/2)-(text_size[0]/2),
-                     (config.window_height/2)-(text_size[1]/2))
-    PrintText(config, surface, text_position, text_font)([text])
+    text = [[ColoredString("L", (0, 121, 234)),
+             ColoredString("O", (23, 132, 234)),
+             ColoredString("A", (47, 144, 234)),
+             ColoredString("D", (70, 155, 234)),
+             ColoredString("I", (94, 166, 234)),
+             ColoredString("N", (117, 178, 234)),
+             ColoredString("G", (140, 189, 234)),
+             ColoredString(".", (164, 200, 234)),
+             ColoredString(".", (187, 211, 234)),
+             ColoredString(".", (211, 223, 234))]]
+    text_font = create_font(config, int(math.ceil(config.window_height * 0.1)))
+    text_size = text_font.size("".join(x.text for x in text[0]))
+    text_position = ((config.window_width / 2) - (text_size[0] / 2),
+                     (config.window_height / 2) - (text_size[1] / 2))
+    PrintText(config, surface, text_position, text_font)(text)
     pygame.display.flip()
