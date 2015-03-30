@@ -36,7 +36,7 @@ def get_job_eta(job):
     eta = get_formatted_eta(start_time, duration)
     percent = get_formatted_percent(start_time, duration)
     if job["building"]:
-        return "{:>8}, ({}%)".format(eta, percent)
+        return "{:>8}, {:3}%".format(eta, percent)
     else:
         return "N/A"
 
@@ -70,7 +70,7 @@ class AskJenkinsJobStatus(object):
     def __call__(self):
         COLUMN_1 = "Jenkins Job Name                     "
         COLUMN_2 = " Status "
-        COLUMN_3 = "     E.T.A.     "
+        COLUMN_3 = "    E.T.A.    "
 
         table = prettytable.PrettyTable([COLUMN_1, COLUMN_2, COLUMN_3])
         table.align[COLUMN_1] = "l"
@@ -101,7 +101,7 @@ class AskJenkinsJobStatus(object):
             hit = self.building_pattern.match(line)
             if hit:
                 text.append([ColoredString(hit.group(1)),
-                             ColoredString(hit.group(2), (0, 0, 255)),
+                             ColoredString(hit.group(2), (90, 160, 240)),
                              ColoredString(hit.group(3))])
                 continue
             text.append([ColoredString(line)])
