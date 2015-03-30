@@ -50,14 +50,15 @@ class AskW(object):
 
 class AskFinger(object):
 
-    def __init__(self):
-        self.login_name = os.getlogin()
-        self.highlight_login_name_pattern = re.compile("(.*)({})(.*)".format(self.login_name))
+    def __init__(self, login_name):
+        self.login_name = login_name
+        self.login_name_pattern = re.compile("(.*)({})(.*)".
+                                             format(self.login_name))
 
     def __call__(self):
         text = []
         for line in execute_simple_command(["finger", self.login_name]):
-            hit = self.highlight_login_name_pattern.match(line)
+            hit = self.login_name_pattern.match(line)
             if hit:
                 text.append([ColoredString(hit.group(1)),
                              ColoredString(hit.group(2), (255, 0, 0)),

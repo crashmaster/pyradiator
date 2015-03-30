@@ -62,7 +62,7 @@ class RadiatorChannel(object):
         self.dispatcher.stop()
 
     def no_signal(self):
-        return self.consumer.no_date_from_the_queue
+        return self.consumer.no_data_from_the_queue
 
     def display_static(self):
         x_offset = RRR(30) - 30

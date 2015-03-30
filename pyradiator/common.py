@@ -1,23 +1,19 @@
 import math
 import subprocess
-import sys
 
 import pygame
-
-
-PY3K = sys.version_info >= (3, 0)
 
 
 def _execute_command(function, *args, **kwargs):
     try:
         process = function(*args, **kwargs)
     except OSError:
-        return
+        pass
     else:
-        if PY3K:
-            return process.communicate()[0].decode().splitlines()
-        else:
-            return process.communicate()[0].splitlines()
+        output = process.communicate()[0].decode()
+        if output:
+            return output.splitlines()
+    return []
 
 
 def execute_simple_command(command):

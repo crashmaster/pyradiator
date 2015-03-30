@@ -1,3 +1,4 @@
+import os
 import contextlib
 import logging
 import random
@@ -115,24 +116,26 @@ def loop(application_state, config, subsurfaces, channels):
 
 def create_channels(config, subsurfaces):
     shows = [
-        ("top", AskTop, {}, 10),
-        ("cowsay", AskTheCow, {}, 15),
-        ("w", AskW, {}, 20),
-        ("finger", AskFinger, {}, 25),
+        ("top", AskTop, {}, None, 10),
+        ("cowsay", AskTheCow, {}, 26, 11),
+        ("w", AskW, {}, None, 12),
+        ("finger", AskFinger, {"login_name": os.getlogin()}, None, 13),
     ]
     channels = []
     for i in range(config.number_of_left_rows + config.number_of_right_rows):
         show = random.choice(shows)
+        input_functor = show[1](**show[2])
+        output_functor = PrintText(config=config,
+                                   surface=subsurfaces[i],
+                                   position=(0, 0),
+                                   font=create_font(config, show[3]))
         channels.append(
             RadiatorChannel(config=config,
                             name=show[0],
                             surface=subsurfaces[i],
-                            input_functor=show[1](**show[2]),
-                            output_functor=PrintText(config=config,
-                                                     surface=subsurfaces[i],
-                                                     position=(0, 0),
-                                                     font=create_font(config)),
-                            update_period=show[3]))
+                            input_functor=input_functor,
+                            output_functor=output_functor,
+                            update_period=show[4]))
     return channels
 
 

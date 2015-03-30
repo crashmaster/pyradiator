@@ -1,7 +1,7 @@
 try:
     import queue
 except ImportError:
-    import Queue
+    import Queue    # noqa
 import threading
 
 
@@ -40,7 +40,7 @@ class Consumer(object):
         self._queue = queue
         self._function = function
         self._thread = threading.Thread(target=self._loop)
-        self.no_date_from_the_queue = True
+        self.no_data_from_the_queue = True
 
     def start(self):
         self._thread.start()
@@ -51,6 +51,6 @@ class Consumer(object):
 
     def _loop(self):
         for result in iter(self._queue.get, self.STOP_SENTINEL):
-            self.no_date_from_the_queue = result is None
+            self.no_data_from_the_queue = not result
             if result:
                 self._function(result)
