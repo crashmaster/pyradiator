@@ -35,7 +35,7 @@ def get_job_status(job_info):
     if job_info["result"] is None and job_info["building"]:
         return "BUILDING"
     else:
-        return job_info["result"],
+        return job_info["result"]
 
 
 def get_job_eta(job):
@@ -77,23 +77,19 @@ class AskJenkinsJobStatus(object):
         self.failure_pattern = re.compile("(.*)(FAILURE)(.*)")
         self.unstable_pattern = re.compile("(.*)(UNSTABLE)(.*)")
         self.building_pattern = re.compile("(.*)(BUILDING)(.*)")
-        self.table = prettytable.PrettyTable([
-            self.COLUMN_1,
-            self.COLUMN_2,
-            self.COLUMN_3
-        ])
-        self.table.align[self.COLUMN_1] = "l"
 
     def __call__(self):
-        self.table.clear_rows()
+        table = prettytable.PrettyTable([self.COLUMN_1, self.COLUMN_2, self.COLUMN_3])
+        table.align[self.COLUMN_1] = "l"
+
         try:
             for job_name in self.jobs.job_names:
-                self.table.add_row(get_job_info(self.jobs.url, job_name))
+                table.add_row(get_job_info(self.jobs.url, job_name))
         except Exception:
             return []
 
         text = []
-        for line in self.table.get_string().splitlines():
+        for line in table.get_string().splitlines():
             hit = self.success_pattern.match(line)
             if hit:
                 text.append([ColoredString(hit.group(1)),
