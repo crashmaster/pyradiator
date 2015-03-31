@@ -97,19 +97,17 @@ def create_sub_surfaces(config, main_surface):
 
 
 def loop(application_state, config, subsurfaces, channels):
-    display_refresh = pygame.USEREVENT
-    pygame.time.set_timer(display_refresh, int(1000.0 / config.fps))
+    clock = pygame.time.Clock()
     LOGGER.debug("Enter main loop")
     application_state.set_application_state(application_state.MAIN_LOOP)
     while application_state.running:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 application_state.stop_main_loop()
-            elif event.type == display_refresh:
-                pygame.display.flip()
             for channel in channels:
                 if channel.no_signal():
-                    channel.display_static()
+                    channel.display_static(clock)
+        pygame.display.flip()
 
         pygame.time.wait(0)
 

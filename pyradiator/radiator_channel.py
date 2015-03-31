@@ -41,9 +41,10 @@ def create_no_signal_overlay(config, channel_name):
 
 class RadiatorChannel(object):
     def __init__(self, config, name, surface, input_functor, output_functor, update_period):
+        self.config = config
         self.surface = surface
-        self.static = create_static_surface(config, self.surface)
-        self.overlay = create_no_signal_overlay(config, name)
+        self.static = create_static_surface(self.config, self.surface)
+        self.overlay = create_no_signal_overlay(self.config, name)
         self.dispatcher = Dispatcher()
         self.producer = Producer(update_period,
                                  self.dispatcher.input_queue,
@@ -64,9 +65,12 @@ class RadiatorChannel(object):
     def no_signal(self):
         return self.consumer.no_data_from_the_queue
 
-    def display_static(self):
+    def display_static(self, clock):
         x_offset = RRR(30) - 30
         y_offset = RRR(30) - 30
         self.static.scroll(x_offset, y_offset)
         self.surface.blit(self.static, (0, 0))
         self.surface.blit(self.overlay, (5, 5))
+        if not pygame.event.peek(pygame.USEREVENT):
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT))
+        clock.tick(self.config.fps)
