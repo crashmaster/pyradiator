@@ -62,132 +62,132 @@ def parse_arguments(display_info):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--title",
+        help="Title of the radiator window.",
+        default="PyRadiator",
         type=str,
-        default="PyRadiator by Crashmaster",
-        help="Title of the radiator window."
     )
     parser.add_argument(
         "--fps",
-        type=int,
+        help="Expected frames per second for the radiator.",
         default=60,
-        help="Expected frames per second for the radiator."
+        type=int,
     )
     parser.add_argument(
         "--fullscreen",
-        action="store_true",
+        help="Display radiator in fullscreen mode.",
         default=False,
-        help="Display radiator in fullscreen mode."
+        action="store_true",
     )
     parser.add_argument(
         "--window-width",
-        type=int,
+        help="Width in pixels of the radiator.",
         default=int(display_info.current_w),
+        type=int,
         action=StoreSize,
         const=display_info.current_w,
-        help="Width in pixels of the radiator."
     )
     parser.add_argument(
         "--window-height",
+        help="Height in pixels of the radiator.",
+        default=int(display_info.current_h),
         type=int,
         action=StoreSize,
         const=display_info.current_h,
-        default=int(display_info.current_h),
-        help="Height in pixels of the radiator."
     )
     parser.add_argument(
         "--margin-size",
+        help="Margin size in pixels of the surfaces.",
+        default=5,
         type=int,
         action=StoreSize,
         const=50,
-        default=5,
-        help="Margin size in pixels of the surfaces."
     )
     parser.add_argument(
         "--main-surface-color",
-        action=StoreColor,
+        help="Color of the main surfaces.",
         default=BLACK,
+        action=StoreColor,
         choices=COLORS.keys(),
-        help="Color of the main surfaces."
     )
     parser.add_argument(
         "--sub-surface-color",
-        action=StoreColor,
+        help="Color of the sub-surfaces.",
         default=BLACK,
+        action=StoreColor,
         choices=COLORS.keys(),
-        help="Color of the sub-surfaces."
     )
     parser.add_argument(
         "--static-fg-color",
-        action=StoreColor,
+        help="Foreground color of the no-signal static noise.",
         default=GRAY,
+        action=StoreColor,
         choices=COLORS.keys(),
-        help="Foreground color of the no-signal static noise."
     )
     parser.add_argument(
         "--static-bg-color",
-        action=StoreColor,
+        help="Background color of the no-signal static noise.",
         default=BLACK,
+        action=StoreColor,
         choices=COLORS.keys(),
-        help="Background color of the no-signal static noise."
     )
     parser.add_argument(
         "--font",
+        help="Font of the output-text. List system fonts with 'list' value.",
+        default=pygame.font.get_default_font(),
         type=str,
         action=StoreFont,
-        default=pygame.font.get_default_font(),
-        help="Font of the output-text. List system fonts with 'list' value."
     )
     parser.add_argument(
         "--font-size",
-        type=int,
+        help="Font-size of the output-text.",
         default=20,
-        help="Font-size of the output-text."
+        type=int,
     )
     parser.add_argument(
         "--font-bold",
-        action="store_true",
+        help="Font of the output text is bold.",
         default=False,
-        help="Font of the output text is bold."
+        action="store_true",
     )
     parser.add_argument(
         "--font-italic",
-        action="store_true",
+        help="Font of the output text is italic.",
         default=False,
-        help="Font of the output text is italic."
+        action="store_true",
     )
     parser.add_argument(
         "--font-fg-color",
-        action=StoreColor,
+        help="Foreground color of the fonts.",
         default=WHITE,
+        action=StoreColor,
         choices=COLORS.keys(),
-        help="Foreground color of the fonts."
     )
     parser.add_argument(
         "--font-bg-color",
-        action=StoreColor,
+        help="Background color of the fonts.",
         default=BLACK,
+        action=StoreColor,
         choices=COLORS.keys(),
-        help="Background color of the fonts."
     )
     parser.add_argument(
         "--font-antialias",
+        help="Font of the output text is antialiased.",
+        default=1,
         type=int,
         choices=[0, 1],
-        default=1,
-        help="Font of the output text is antialiased."
     )
     parser.add_argument(
         "--number-of-left-rows",
+        help="Number of rows on the left side.",
+        default=2,
         type=int,
         choices=[0, 1, 2, 3, 4],
-        default=2,
-        help="Number of rows on the left side."
     )
     parser.add_argument(
         "--number-of-right-rows",
+        help="Number of rows on the right side.",
+        default=2,
         type=int,
         choices=[0, 1, 2, 3, 4],
-        default=2,
-        help="Number of rows on the right side."
     )
     return parser.parse_args()
