@@ -1,5 +1,6 @@
 import collections
 import datetime
+import logging
 import re
 import time
 
@@ -8,18 +9,30 @@ import prettytable
 
 from common import ColoredString
 
+
+LOGGER = logging.getLogger(__name__)
+
+CURRENT_BUILD = 0
+LAST_BUILD = 1
+COLOR_MAP = {
+    "UNSTABLE": (255, 255, 0),
+    "FAILURE": (255, 0, 0),
+    "SUCCESS": (0, 255, 0),
+}
 JSON_API_URL = "/api/json"
 
 JenkinsJobs = collections.namedtuple("JenkinsJobs", ["url", "job_names"])
 
 
 def get_job_info(jenkins_url, job_name):
+    LOGGER.debug("Get status of the job %s", job_name)
     job_summary = get_job_summary(jenkins_url, job_name)
-    job_info = get_last_job_info(job_summary)
+    last_build_info = get_build_info(job_summary, LAST_BUILD)
+    current_build_info = get_build_info(job_summary, CURRENT_BUILD)
     return (
-        job_summary["name"],
-        get_job_status(job_info),
-        get_job_eta(job_info)
+        get_job_name(job_summary, last_build_info),
+        get_job_status(current_build_info),
+        get_job_eta(current_build_info)
     )
 
 
@@ -27,15 +40,25 @@ def get_job_summary(jenkins_url, job_name):
     return requests.get(jenkins_url + job_name + JSON_API_URL).json()
 
 
-def get_last_job_info(job_summary):
-    return requests.get(job_summary["builds"][0]["url"] + JSON_API_URL).json()
+def get_build_info(job_summary, build_number):
+    return requests.get(job_summary["builds"][build_number]["url"] + JSON_API_URL).json()
 
 
-def get_job_status(job_info):
-    if job_info["result"] is None and job_info["building"]:
-        return "BUILDING"
+def get_job_name(job_summary, last_build_info):
+    color = COLOR_MAP.get(last_build_info["result"], (255, 255, 255))
+    return ColoredString(job_summary["name"], color)
+
+
+def get_current_build_info(job_summary):
+    return requests.get(job_summary["builds"][CURRENT_BUILD]["url"] + JSON_API_URL).json()
+
+
+def get_job_status(build_info):
+    if build_info["result"] is None and build_info["building"]:
+        return ColoredString("BUILDING", (255, 255, 255))
     else:
-        return job_info["result"]
+        color = COLOR_MAP.get(build_info["result"], (255, 255, 255))
+        return ColoredString(build_info["result"], color)
 
 
 def get_job_eta(job):
@@ -43,9 +66,10 @@ def get_job_eta(job):
     eta = get_formatted_eta(start_time, duration)
     percent = get_formatted_percent(start_time, duration)
     if job["building"]:
-        return "{:>8}, {:3}%".format(eta, percent)
+        eta = "{:>8}, {:3}%".format(eta, percent)
     else:
-        return "N/A"
+        eta = "N/A"
+    return ColoredString(eta, (255, 255, 255))
 
 
 def get_formatted_eta(start_time, duration):
@@ -73,46 +97,35 @@ class AskJenkinsJobStatus(object):
 
     def __init__(self, jobs):
         self.jobs = jobs
-        self.success_pattern = re.compile("(.*)(SUCCESS)(.*)")
-        self.failure_pattern = re.compile("(.*)(FAILURE)(.*)")
-        self.unstable_pattern = re.compile("(.*)(UNSTABLE)(.*)")
-        self.building_pattern = re.compile("(.*)(BUILDING)(.*)")
+        self.pretty_table_row_pattern = re.compile(r"(\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|)")
 
     def __call__(self):
         table = prettytable.PrettyTable([self.COLUMN_1, self.COLUMN_2, self.COLUMN_3])
         table.align[self.COLUMN_1] = "l"
 
         try:
-            for job_name in self.jobs.job_names:
-                table.add_row(get_job_info(self.jobs.url, job_name))
+            job_info_list = [get_job_info(self.jobs.url, x) for x in self.jobs.job_names]
+            for job_info in job_info_list:
+                job_info_columns = [x.text for x in job_info]
+                table.add_row(job_info_columns)
         except Exception:
             return []
 
+        table_lines = table.get_string().splitlines()
         text = []
-        for line in table.get_string().splitlines():
-            hit = self.success_pattern.match(line)
-            if hit:
-                text.append([ColoredString(hit.group(1)),
-                             ColoredString(hit.group(2), (0, 255, 0)),
-                             ColoredString(hit.group(3))])
-                continue
-            hit = self.failure_pattern.match(line)
-            if hit:
-                text.append([ColoredString(hit.group(1)),
-                             ColoredString(hit.group(2), (255, 0, 0)),
-                             ColoredString(hit.group(3))])
-                continue
-            hit = self.unstable_pattern.match(line)
-            if hit:
-                text.append([ColoredString(hit.group(1)),
-                             ColoredString(hit.group(2), (255, 255, 0)),
-                             ColoredString(hit.group(3))])
-                continue
-            hit = self.building_pattern.match(line)
-            if hit:
-                text.append([ColoredString(hit.group(1)),
-                             ColoredString(hit.group(2), (90, 160, 240)),
-                             ColoredString(hit.group(3))])
-                continue
+        for line in table_lines[:3]:
             text.append([ColoredString(line)])
+        for i, line in enumerate(table_lines[3:-1]):
+            hit = self.pretty_table_row_pattern.match(line)
+            if hit:
+                text.append([
+                    ColoredString(hit.group(1)),
+                    ColoredString(hit.group(2), job_info_list[i][0].color),
+                    ColoredString(hit.group(3)),
+                    ColoredString(hit.group(4), job_info_list[i][1].color),
+                    ColoredString(hit.group(5)),
+                    ColoredString(hit.group(6), job_info_list[i][2].color),
+                    ColoredString(hit.group(7)),
+                ])
+        text.append([ColoredString(table_lines[-1])])
         return text

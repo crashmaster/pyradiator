@@ -61,6 +61,9 @@ class ColoredString(object):
         self.text = text
         self.color = color
 
+    def __str__(self):
+        return "Text: {}, Color: {}".format(self.text, self.color)
+
 
 class PrintText(object):
 
