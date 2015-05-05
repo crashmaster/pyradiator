@@ -89,7 +89,7 @@ def get_formatted_percent(start_time, duration):
     return 100 if percent > 100 else percent
 
 
-class AskJenkinsJobStatus(object):
+class AskJenkinsJobsStatus(object):
 
     COLUMN_1 = "Jenkins Job Name                     "
     COLUMN_2 = " Status "
@@ -100,6 +100,7 @@ class AskJenkinsJobStatus(object):
         self.pretty_table_row_pattern = re.compile(r"(\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|)")
 
     def __call__(self):
+        LOGGER.debug("{}.__call__ called".format(self.__class__.__name__))
         table = prettytable.PrettyTable([self.COLUMN_1, self.COLUMN_2, self.COLUMN_3])
         table.align[self.COLUMN_1] = "l"
 
