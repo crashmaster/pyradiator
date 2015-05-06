@@ -2,9 +2,10 @@ import re
 
 from common import ColoredString
 from common import execute_simple_command
+from content_providers.ask_x import AskX
 
 
-class AskFinger(object):
+class AskFinger(AskX):
 
     def __init__(self, login_name):
         self.login_name = login_name

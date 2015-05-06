@@ -17,6 +17,7 @@ PACKAGE_REQUIREMENTS = [
     "prettytable",
     "pygame",
     "requests",
+    "six",
     "stevedore",
 ]
 DEPENDENCY_LINKS = [

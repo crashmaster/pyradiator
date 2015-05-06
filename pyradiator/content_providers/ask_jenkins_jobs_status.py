@@ -8,6 +8,7 @@ import requests
 import prettytable
 
 from common import ColoredString
+from content_providers.ask_x import AskX
 
 
 LOGGER = logging.getLogger(__name__)
@@ -89,7 +90,7 @@ def get_formatted_percent(start_time, duration):
     return 100 if percent > 100 else percent
 
 
-class AskJenkinsJobsStatus(object):
+class AskJenkinsJobsStatus(AskX):
 
     COLUMN_1 = "Jenkins Job Name                     "
     COLUMN_2 = " Status "

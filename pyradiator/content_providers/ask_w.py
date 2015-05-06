@@ -1,8 +1,9 @@
 from common import ColoredString
 from common import execute_simple_command
+from content_providers.ask_x import AskX
 
 
-class AskW(object):
+class AskW(AskX):
 
     def __call__(self):
         return [
