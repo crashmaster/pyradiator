@@ -1,8 +1,8 @@
 import random
 
-from common import ColoredString
-from common import execute_compound_command
-from content_providers.ask_x import AskX
+from pyradiator.common import ColoredString
+from pyradiator.common import execute_compound_command
+from pyradiator.content_providers.ask_x import AskX
 
 
 class AskTheCow(AskX):

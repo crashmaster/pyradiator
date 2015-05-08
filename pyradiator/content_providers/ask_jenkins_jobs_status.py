@@ -7,8 +7,8 @@ import time
 import requests
 import prettytable
 
-from common import ColoredString
-from content_providers.ask_x import AskX
+from pyradiator.common import ColoredString
+from pyradiator.content_providers.ask_x import AskX
 
 
 LOGGER = logging.getLogger(__name__)

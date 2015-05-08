@@ -34,7 +34,6 @@ CONTENT_PROVIDERS = [
     "AskTheCow = pyradiator.content_providers.ask_the_cow:AskTheCow",
     "AskTop = pyradiator.content_providers.ask_top:AskTop",
     "AskW = pyradiator.content_providers.ask_w:AskW",
-    "AskJenkinsJobsStatus = pyradiator.content_providers.ask_jenkins_jobs_status:AskJenkinsJobsStatus",
 ]
 
 
@@ -49,6 +48,6 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": CONSOLE_SCRIPTS,
-        "pyradiator.radiator.content_providers": CONTENT_PROVIDERS,
+        "pyradiator.content_providers": CONTENT_PROVIDERS,
     }
 )
