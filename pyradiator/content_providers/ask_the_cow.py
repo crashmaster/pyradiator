@@ -2,10 +2,9 @@ import random
 
 from pyradiator.common import ColoredString
 from pyradiator.common import execute_compound_command
-from pyradiator.content_providers.ask_x import AskX
 
 
-class AskTheCow(AskX):
+class AskTheCow(object):
 
     def __init__(self):
         self.cows = ["-b", "-d", "-g", "-p", "-s", "-t", "-w", "-y"]

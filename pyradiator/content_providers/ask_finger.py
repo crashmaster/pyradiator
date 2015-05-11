@@ -2,10 +2,9 @@ import re
 
 from pyradiator.common import ColoredString
 from pyradiator.common import execute_simple_command
-from pyradiator.content_providers.ask_x import AskX
 
 
-class AskFinger(AskX):
+class AskFinger(object):
 
     def __init__(self, login_name):
         self.login_name = login_name

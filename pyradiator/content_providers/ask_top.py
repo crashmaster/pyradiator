@@ -2,10 +2,9 @@ import os
 
 from pyradiator.common import ColoredString
 from pyradiator.common import execute_simple_command
-from pyradiator.content_providers.ask_x import AskX
 
 
-class AskTop(AskX):
+class AskTop(object):
 
     def __call__(self):
         return [

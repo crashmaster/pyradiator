@@ -5,8 +5,11 @@ import random
 import sys
 
 import pygame
-from stevedore.dispatch import NameDispatchExtensionManager
 
+from pyradiator.content_providers.ask_finger import AskFinger
+from pyradiator.content_providers.ask_the_cow import AskTheCow
+from pyradiator.content_providers.ask_top import AskTop
+from pyradiator.content_providers.ask_w import AskW
 from app_state import ApplicationState
 from command_line_args import parse_arguments
 from common import PrintText
@@ -109,28 +112,28 @@ def loop(application_state, config, subsurfaces, channels):
         pygame.time.wait(0)
 
 
-def create_channels(config, dispatcher, subsurfaces):
+def create_channels(config, subsurfaces):
     shows = [
-        ("top", dispatcher.map_method(["AskTop"], "get_instance"), None, 10),
-        ("cowsay", dispatcher.map_method(["AskTheCow"], "get_instance"), 26, 11),
-        ("w", dispatcher.map_method(["AskW"], "get_instance"), None, 12),
-        ("finger", dispatcher.map_method(["AskFinger"], "get_instance", os.getlogin()), None, 13),
+        ("top", AskTop, {}, None, 10),
+        ("cowsay", AskTheCow, {}, 26, 11),
+        ("w", AskW, {}, None, 12),
+        ("finger", AskFinger, {"login_name": os.getlogin()}, None, 13),
     ]
     channels = []
     for i in range(config.number_of_left_rows + config.number_of_right_rows):
         show = random.choice(shows)
-        input_functor = show[1]
+        input_functor = show[1](**show[2])
         output_functor = PrintText(config=config,
                                    surface=subsurfaces[i],
                                    position=(0, 0),
-                                   font=create_font(config, show[2]))
+                                   font=create_font(config, show[3]))
         channels.append(
             RadiatorChannel(config=config,
                             name=show[0],
                             surface=subsurfaces[i],
                             input_functor=input_functor,
                             output_functor=output_functor,
-                            update_period=show[3]))
+                            update_period=show[4]))
     return channels
 
 
@@ -158,15 +161,7 @@ def main():
     print_loading_screen(config, main_surface)
     main_surface.fill(config.main_surface_color)
 
-    dispatcher = NameDispatchExtensionManager(
-        namespace="pyradiator.content_providers",
-        check_func=lambda *args, **kwds: True,
-        invoke_on_load=True,
-        invoke_args=(),
-        invoke_kwds={},
-        propagate_map_exceptions=True
-    )
-    channels = create_channels(config, dispatcher, subsurfaces)
+    channels = create_channels(config, subsurfaces)
 
     with turn_on_channels(application_state, channels):
         loop(application_state, config, subsurfaces, channels)
