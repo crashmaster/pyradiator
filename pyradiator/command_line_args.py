@@ -179,14 +179,14 @@ def parse_arguments(display_info):
     parser.add_argument(
         "--number-of-left-rows",
         help="Number of rows on the left side.",
-        default=2,
+        default=0,
         type=int,
         choices=[0, 1, 2, 3, 4],
     )
     parser.add_argument(
         "--number-of-right-rows",
         help="Number of rows on the right side.",
-        default=2,
+        default=0,
         type=int,
         choices=[0, 1, 2, 3, 4],
     )

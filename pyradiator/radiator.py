@@ -165,6 +165,3 @@ def main():
 
     with turn_on_channels(application_state, channels):
         loop(application_state, config, subsurfaces, channels)
-
-
-sys.exit(main())
