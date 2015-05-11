@@ -6,16 +6,16 @@ import sys
 
 import pygame
 
+from pyradiator.app_state import ApplicationState
+from pyradiator.command_line_args import parse_arguments
+from pyradiator.common import PrintText
+from pyradiator.common import create_font
+from pyradiator.common import print_loading_screen
 from pyradiator.content_providers.ask_finger import AskFinger
 from pyradiator.content_providers.ask_the_cow import AskTheCow
 from pyradiator.content_providers.ask_top import AskTop
 from pyradiator.content_providers.ask_w import AskW
-from app_state import ApplicationState
-from command_line_args import parse_arguments
-from common import PrintText
-from common import create_font
-from common import print_loading_screen
-from radiator_channel import RadiatorChannel
+from pyradiator.radiator_channel import RadiatorChannel
 
 
 IS_HELP_MODE = any(x in sys.argv for x in ["-h", "--help", "list"])

@@ -2,10 +2,10 @@ import random
 
 import pygame
 
-from common import create_font
-from dispatcher import Dispatcher
-from endpoint import Producer
-from endpoint import Consumer
+from pyradiator.common import create_font
+from pyradiator.dispatcher import Dispatcher
+from pyradiator.endpoint import Consumer
+from pyradiator.endpoint import Producer
 
 
 RRR = random.randrange
