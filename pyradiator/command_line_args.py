@@ -56,12 +56,12 @@ class StoreColor(argparse.Action):
         setattr(namespace, self.dest, COLORS[value])
 
 
-def parse_arguments(display_info):
+def parse_command_line_arguments(display_info):
     parser = argparse.ArgumentParser(
         description="THE Radiator.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        "--title",
+        "--window-title",
         help="Title of the radiator window.",
         default="PyRadiator",
         type=str,
@@ -191,3 +191,7 @@ def parse_arguments(display_info):
         choices=[0, 1, 2, 3, 4],
     )
     return parser.parse_args()
+
+
+def get_configuration(display_info):
+    return parse_command_line_arguments(display_info)

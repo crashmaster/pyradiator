@@ -7,7 +7,7 @@ import sys
 import pygame
 
 from pyradiator.app_state import ApplicationState
-from pyradiator.command_line_args import parse_arguments
+from pyradiator.command_line_args import get_configuration
 from pyradiator.common import PrintText
 from pyradiator.common import create_font
 from pyradiator.common import print_loading_screen
@@ -150,7 +150,10 @@ def main():
     initialize_pygame_modules()
     disable_mouse_events()
     display_info = get_display_info()
-    config = parse_arguments(display_info)
+    config = get_configuration(display_info)
+    print config
+    print vars(config)
+    return
 
     main_surface = create_main_surface(config)
     subsurfaces = create_sub_surfaces(config, main_surface)
