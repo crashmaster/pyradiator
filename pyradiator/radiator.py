@@ -37,12 +37,6 @@ def disable_mouse_events():
     LOGGER.debug("Mouse-events: motion, button-up, button-down disabled")
 
 
-def get_display_info():
-    display_info = pygame.display.Info()
-    LOGGER.debug("Display info: \n{}".format(display_info).rstrip())
-    return display_info
-
-
 def create_main_surface(config):
     pygame.display.set_caption(config.title)
     resolution = (config.window_width, config.window_height)
@@ -149,8 +143,7 @@ def main():
 
     initialize_pygame_modules()
     disable_mouse_events()
-    display_info = get_display_info()
-    config = get_configuration(display_info)
+    config = get_configuration()
     print config
     print vars(config)
     return
