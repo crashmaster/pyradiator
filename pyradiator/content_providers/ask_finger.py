@@ -1,7 +1,7 @@
 import re
 
 from pyradiator.common import ColoredString
-from pyradiator.common import execute_simple_command
+from pyradiator.execute_command import execute_simple_command
 
 
 class AskFinger(object):

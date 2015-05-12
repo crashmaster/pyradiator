@@ -1,7 +1,7 @@
 import random
 
 from pyradiator.common import ColoredString
-from pyradiator.common import execute_compound_command
+from pyradiator.execute_command import execute_compound_command
 
 
 class AskTheCow(object):
