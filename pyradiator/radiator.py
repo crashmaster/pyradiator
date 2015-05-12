@@ -11,10 +11,7 @@ from pyradiator.command_line_args import parse_arguments
 from pyradiator.common import PrintText
 from pyradiator.common import create_font
 from pyradiator.common import print_loading_screen
-from pyradiator.content_providers.ask_finger import AskFinger
-from pyradiator.content_providers.ask_the_cow import AskTheCow
-from pyradiator.content_providers.ask_top import AskTop
-from pyradiator.content_providers.ask_w import AskW
+from pyradiator.content_providers.content_provider_loader import load_content_provider
 from pyradiator.radiator_channel import RadiatorChannel
 
 
@@ -114,10 +111,10 @@ def loop(application_state, config, subsurfaces, channels):
 
 def create_channels(config, subsurfaces):
     shows = [
-        ("top", AskTop, {}, None, 10),
-        ("cowsay", AskTheCow, {}, 26, 11),
-        ("w", AskW, {}, None, 12),
-        ("finger", AskFinger, {"login_name": os.getlogin()}, None, 13),
+        ("top", load_content_provider("ask_top"), {}, None, 10),
+        ("cowsay", load_content_provider("ask_the_cow"), {}, 26, 11),
+        ("w", load_content_provider("ask_w"), {}, None, 12),
+        ("finger", load_content_provider("ask_finger"), {"login_name": os.getlogin()}, None, 13),
     ]
     channels = []
     for i in range(config.number_of_left_rows + config.number_of_right_rows):
