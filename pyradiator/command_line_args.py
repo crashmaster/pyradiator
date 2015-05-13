@@ -250,6 +250,15 @@ def get_command_line_arguments(display_info):
             choices=[0, 1, 2, 3, 4],
             const=None
         ),
+        CommandLineArgument(
+            name="--config-file",
+            help="Configuration file path. Generate config file with 'generate' value",
+            default="~/.config/pyradiator",
+            type=str,
+            action=None,
+            choices=None,
+            const=None
+        ),
     ]
 
 
