@@ -30,7 +30,6 @@ def get_display_info():
     LOGGER.debug("Display info: \n{}".format(display_info).rstrip())
     return display_info
 
-DISPLAY_INFO = get_display_info()
 
 CommandLineArgument = collections.namedtuple(
     "CommandLineArgument", [
@@ -78,317 +77,202 @@ class StoreSize(argparse.Action):
         setattr(namespace, self.dest, value)
 
 
-COMMAND_LINE_ARGUMENTS = [
-    CommandLineArgument(
-        name="--window-title",
-        help="Title of the radiator window.",
-        default="PyRadiator",
-        type=str,
-        action=None,
-        choices=None,
-        const=None
-    ),
-    CommandLineArgument(
-        name="--fps",
-        help="Expected frames per second for the radiator.",
-        default=60,
-        type=int,
-        action=None,
-        choices=None,
-        const=None
-    ),
-    CommandLineArgument(
-        name="--fullscreen",
-        help="Display radiator in fullscreen mode.",
-        default=False,
-        type=None,
-        action="store_true",
-        choices=None,
-        const=None
-    ),
-    CommandLineArgument(
-        name="--window-width",
-        help="Width in pixels of the radiator.",
-        default=int(DISPLAY_INFO.current_w),
-        type=int,
-        action=StoreSize,
-        choices=None,
-        const=DISPLAY_INFO.current_w,
-    ),
-    CommandLineArgument(
-        name="--window-height",
-        help="Height in pixels of the radiator.",
-        default=int(DISPLAY_INFO.current_h),
-        type=int,
-        action=StoreSize,
-        choices=None,
-        const=DISPLAY_INFO.current_h,
-    ),
-    CommandLineArgument(
-        name="--margin-size",
-        help="Margin size in pixels of the surfaces.",
-        default=5,
-        type=int,
-        action=StoreSize,
-        choices=None,
-        const=50,
-    ),
-    CommandLineArgument(
-        name="--main-surface-color",
-        help="Color of the main surfaces.",
-        default=BLACK,
-        type=None,
-        action=StoreColor,
-        choices=COLORS.keys(),
-        const=None
-    ),
-    CommandLineArgument(
-        name="--sub-surface-color",
-        help="Color of the sub-surfaces.",
-        default=BLACK,
-        type=None,
-        action=StoreColor,
-        choices=COLORS.keys(),
-        const=None
-    ),
-    CommandLineArgument(
-        name="--static-fg-color",
-        help="Foreground color of the no-signal static noise.",
-        default=GRAY,
-        type=None,
-        action=StoreColor,
-        choices=COLORS.keys(),
-        const=None
-    ),
-    CommandLineArgument(
-        name="--static-bg-color",
-        help="Background color of the no-signal static noise.",
-        default=BLACK,
-        type=None,
-        action=StoreColor,
-        choices=COLORS.keys(),
-        const=None
-    ),
-    CommandLineArgument(
-        name="--font",
-        help="Font of the output-text. List system fonts with 'list' value.",
-        default=pygame.font.get_default_font(),
-        type=str,
-        action=StoreFont,
-        choices=None,
-        const=None
-    ),
-    CommandLineArgument(
-        name="--font-size",
-        help="Font-size of the output-text.",
-        default=20,
-        type=int,
-        action=None,
-        choices=None,
-        const=None
-    ),
-    CommandLineArgument(
-        name="--font-bold",
-        help="Font of the output text is bold.",
-        default=False,
-        type=None,
-        action="store_true",
-        choices=None,
-        const=None
-    ),
-    CommandLineArgument(
-        name="--font-italic",
-        help="Font of the output text is italic.",
-        default=False,
-        type=None,
-        action="store_true",
-        choices=None,
-        const=None
-    ),
-    CommandLineArgument(
-        name="--font-fg-color",
-        help="Foreground color of the fonts.",
-        default=WHITE,
-        type=None,
-        action=StoreColor,
-        choices=COLORS.keys(),
-        const=None
-    ),
-    CommandLineArgument(
-        name="--font-bg-color",
-        help="Background color of the fonts.",
-        default=BLACK,
-        type=None,
-        action=StoreColor,
-        choices=COLORS.keys(),
-        const=None
-    ),
-    CommandLineArgument(
-        name="--font-antialias",
-        help="Font of the output text is antialiased.",
-        default=1,
-        type=int,
-        action=None,
-        choices=[0, 1],
-        const=None
-    ),
-    CommandLineArgument(
-        name="--number-of-left-rows",
-        help="Number of rows on the left side.",
-        default=0,
-        type=int,
-        action=None,
-        choices=[0, 1, 2, 3, 4],
-        const=None
-    ),
-    CommandLineArgument(
-        name="--number-of-right-rows",
-        help="Number of rows on the right side.",
-        default=0,
-        type=int,
-        action=None,
-        choices=[0, 1, 2, 3, 4],
-        const=None
-    ),
-]
+def get_command_line_arguments(display_info):
+    return [
+        CommandLineArgument(
+            name="--window-title",
+            help="Title of the radiator window.",
+            default="PyRadiator",
+            type=str,
+            action=None,
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
+            name="--fps",
+            help="Expected frames per second for the radiator.",
+            default=60,
+            type=int,
+            action=None,
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
+            name="--fullscreen",
+            help="Display radiator in fullscreen mode.",
+            default=False,
+            type=None,
+            action="store_true",
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
+            name="--window-width",
+            help="Width in pixels of the radiator.",
+            default=int(display_info.current_w),
+            type=int,
+            action=StoreSize,
+            choices=None,
+            const=display_info.current_w,
+        ),
+        CommandLineArgument(
+            name="--window-height",
+            help="Height in pixels of the radiator.",
+            default=int(display_info.current_h),
+            type=int,
+            action=StoreSize,
+            choices=None,
+            const=display_info.current_h,
+        ),
+        CommandLineArgument(
+            name="--margin-size",
+            help="Margin size in pixels of the surfaces.",
+            default=5,
+            type=int,
+            action=StoreSize,
+            choices=None,
+            const=50,
+        ),
+        CommandLineArgument(
+            name="--main-surface-color",
+            help="Color of the main surfaces.",
+            default=BLACK,
+            type=None,
+            action=StoreColor,
+            choices=COLORS.keys(),
+            const=None
+        ),
+        CommandLineArgument(
+            name="--sub-surface-color",
+            help="Color of the sub-surfaces.",
+            default=BLACK,
+            type=None,
+            action=StoreColor,
+            choices=COLORS.keys(),
+            const=None
+        ),
+        CommandLineArgument(
+            name="--static-fg-color",
+            help="Foreground color of the no-signal static noise.",
+            default=GRAY,
+            type=None,
+            action=StoreColor,
+            choices=COLORS.keys(),
+            const=None
+        ),
+        CommandLineArgument(
+            name="--static-bg-color",
+            help="Background color of the no-signal static noise.",
+            default=BLACK,
+            type=None,
+            action=StoreColor,
+            choices=COLORS.keys(),
+            const=None
+        ),
+        CommandLineArgument(
+            name="--font",
+            help="Font of the output-text. List system fonts with 'list' value.",
+            default=pygame.font.get_default_font(),
+            type=str,
+            action=StoreFont,
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
+            name="--font-size",
+            help="Font-size of the output-text.",
+            default=20,
+            type=int,
+            action=None,
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
+            name="--font-bold",
+            help="Font of the output text is bold.",
+            default=False,
+            type=None,
+            action="store_true",
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
+            name="--font-italic",
+            help="Font of the output text is italic.",
+            default=False,
+            type=None,
+            action="store_true",
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
+            name="--font-fg-color",
+            help="Foreground color of the fonts.",
+            default=WHITE,
+            type=None,
+            action=StoreColor,
+            choices=COLORS.keys(),
+            const=None
+        ),
+        CommandLineArgument(
+            name="--font-bg-color",
+            help="Background color of the fonts.",
+            default=BLACK,
+            type=None,
+            action=StoreColor,
+            choices=COLORS.keys(),
+            const=None
+        ),
+        CommandLineArgument(
+            name="--font-antialias",
+            help="Font of the output text is antialiased.",
+            default=1,
+            type=int,
+            action=None,
+            choices=[0, 1],
+            const=None
+        ),
+        CommandLineArgument(
+            name="--number-of-left-rows",
+            help="Number of rows on the left side.",
+            default=0,
+            type=int,
+            action=None,
+            choices=[0, 1, 2, 3, 4],
+            const=None
+        ),
+        CommandLineArgument(
+            name="--number-of-right-rows",
+            help="Number of rows on the right side.",
+            default=0,
+            type=int,
+            action=None,
+            choices=[0, 1, 2, 3, 4],
+            const=None
+        ),
+    ]
 
 
-def parse_command_line_arguments():
-    parser = argparse.ArgumentParser(
-        description="THE Radiator.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "--window-title",
-        help="Title of the radiator window.",
-        default="PyRadiator",
-        type=str,
-    )
-    parser.add_argument(
-        "--fps",
-        help="Expected frames per second for the radiator.",
-        default=60,
-        type=int,
-    )
-    parser.add_argument(
-        "--fullscreen",
-        help="Display radiator in fullscreen mode.",
-        default=False,
-        action="store_true",
-    )
-    parser.add_argument(
-        "--window-width",
-        help="Width in pixels of the radiator.",
-        default=int(DISPLAY_INFO.current_w),
-        type=int,
-        action=StoreSize,
-        const=DISPLAY_INFO.current_w,
-    )
-    parser.add_argument(
-        "--window-height",
-        help="Height in pixels of the radiator.",
-        default=int(DISPLAY_INFO.current_h),
-        type=int,
-        action=StoreSize,
-        const=DISPLAY_INFO.current_h,
-    )
-    parser.add_argument(
-        "--margin-size",
-        help="Margin size in pixels of the surfaces.",
-        default=5,
-        type=int,
-        action=StoreSize,
-        const=50,
-    )
-    parser.add_argument(
-        "--main-surface-color",
-        help="Color of the main surfaces.",
-        default=BLACK,
-        action=StoreColor,
-        choices=COLORS.keys(),
-    )
-    parser.add_argument(
-        "--sub-surface-color",
-        help="Color of the sub-surfaces.",
-        default=BLACK,
-        action=StoreColor,
-        choices=COLORS.keys(),
-    )
-    parser.add_argument(
-        "--static-fg-color",
-        help="Foreground color of the no-signal static noise.",
-        default=GRAY,
-        action=StoreColor,
-        choices=COLORS.keys(),
-    )
-    parser.add_argument(
-        "--static-bg-color",
-        help="Background color of the no-signal static noise.",
-        default=BLACK,
-        action=StoreColor,
-        choices=COLORS.keys(),
-    )
-    parser.add_argument(
-        "--font",
-        help="Font of the output-text. List system fonts with 'list' value.",
-        default=pygame.font.get_default_font(),
-        type=str,
-        action=StoreFont,
-    )
-    parser.add_argument(
-        "--font-size",
-        help="Font-size of the output-text.",
-        default=20,
-        type=int,
-    )
-    parser.add_argument(
-        "--font-bold",
-        help="Font of the output text is bold.",
-        default=False,
-        action="store_true",
-    )
-    parser.add_argument(
-        "--font-italic",
-        help="Font of the output text is italic.",
-        default=False,
-        action="store_true",
-    )
-    parser.add_argument(
-        "--font-fg-color",
-        help="Foreground color of the fonts.",
-        default=WHITE,
-        action=StoreColor,
-        choices=COLORS.keys(),
-    )
-    parser.add_argument(
-        "--font-bg-color",
-        help="Background color of the fonts.",
-        default=BLACK,
-        action=StoreColor,
-        choices=COLORS.keys(),
-    )
-    parser.add_argument(
-        "--font-antialias",
-        help="Font of the output text is antialiased.",
-        default=1,
-        type=int,
-        choices=[0, 1],
-    )
-    parser.add_argument(
-        "--number-of-left-rows",
-        help="Number of rows on the left side.",
-        default=0,
-        type=int,
-        choices=[0, 1, 2, 3, 4],
-    )
-    parser.add_argument(
-        "--number-of-right-rows",
-        help="Number of rows on the right side.",
-        default=0,
-        type=int,
-        choices=[0, 1, 2, 3, 4],
-    )
+def parse_command_line_arguments(command_line_arguments):
+    parser = create_command_line_argument_parser()
+    add_command_line_arguments(parser, command_line_arguments)
     return parser.parse_args()
 
 
+def create_command_line_argument_parser():
+    return argparse.ArgumentParser(
+        description="THE Radiator.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+
+def add_command_line_arguments(parser, command_line_arguments):
+    for i in command_line_arguments:
+        kwargs = {k: v for k, v in vars(i).items() if v}
+        option_string = kwargs.pop("name")
+        parser.add_argument(option_string, **kwargs)
+
+
 def get_configuration():
-    return parse_command_line_arguments()
+    display_info = get_display_info()
+    command_line_arguments = get_command_line_arguments(display_info)
+    return parse_command_line_arguments(command_line_arguments)
