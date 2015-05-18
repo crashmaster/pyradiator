@@ -1,5 +1,6 @@
 import argparse
 import collections
+import json
 import logging
 import sys
 
@@ -7,22 +8,9 @@ import pygame
 
 LOGGER = logging.getLogger(__name__)
 
-BLACK = (0, 0, 0)
-BLUE = (0, 0, 255)
-GRAY = (180, 180, 180)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-WHITE = (255, 255, 255)
-YELLOW = (255, 255, 0)
-COLORS = collections.OrderedDict([
-    ("black", BLACK),
-    ("blue", BLUE),
-    ("gray", GRAY),
-    ("green", GREEN),
-    ("red", RED),
-    ("white", WHITE),
-    ("yellow", YELLOW),
-])
+
+def is_quiet_mode():
+    return any(x in sys.argv for x in ["-h", "--help", "list", "generate"])
 
 
 def get_display_info():
@@ -44,6 +32,24 @@ CommandLineArgument = collections.namedtuple(
 )
 
 
+BLACK = (0, 0, 0)
+BLUE = (0, 0, 255)
+GRAY = (180, 180, 180)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+WHITE = (255, 255, 255)
+YELLOW = (255, 255, 0)
+COLORS = collections.OrderedDict([
+    ("black", BLACK),
+    ("blue", BLUE),
+    ("gray", GRAY),
+    ("green", GREEN),
+    ("red", RED),
+    ("white", WHITE),
+    ("yellow", YELLOW),
+])
+
+
 class StoreColor(argparse.Action):
     def __call__(self, parser, namespace, value, option_string):
         setattr(namespace, self.dest, COLORS[value])
@@ -59,6 +65,22 @@ class StoreFont(argparse.Action):
         if value == "list":
             system_fonts = ", ".join(sorted(pygame.font.get_fonts()))
             print("Available system fonts: {}".format(system_fonts))
+            sys.exit(0)
+
+
+class StoreConfigFile(argparse.Action):
+    def __call__(self, parser, namespace, value, option_string):
+        self.generate_config_file_on_request(value)
+        setattr(namespace, self.dest, value)
+
+    @staticmethod
+    def generate_config_file_on_request(value):
+        if value == "generate":
+            config_dict = {
+                x.name: x.default for x in
+                get_command_line_arguments(get_display_info())
+            }
+            print("{}".format(json.dumps(config_dict, indent=4, sort_keys=True)))
             sys.exit(0)
 
 
@@ -255,7 +277,7 @@ def get_command_line_arguments(display_info):
             help="Configuration file path. Generate config file with 'generate' value",
             default="~/.config/pyradiator",
             type=str,
-            action=None,
+            action=StoreConfigFile,
             choices=None,
             const=None
         ),
@@ -282,6 +304,5 @@ def add_command_line_arguments(parser, command_line_arguments):
 
 
 def get_configuration():
-    display_info = get_display_info()
-    command_line_arguments = get_command_line_arguments(display_info)
+    command_line_arguments = get_command_line_arguments(get_display_info())
     return parse_command_line_arguments(command_line_arguments)

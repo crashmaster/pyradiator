@@ -2,12 +2,12 @@ import os
 import contextlib
 import logging
 import random
-import sys
 
 import pygame
 
 from pyradiator.app_state import ApplicationState
 from pyradiator.command_line_args import get_configuration
+from pyradiator.command_line_args import is_quiet_mode
 from pyradiator.common import PrintText
 from pyradiator.common import create_font
 from pyradiator.common import print_loading_screen
@@ -15,9 +15,7 @@ from pyradiator.content_providers.content_provider_loader import load_content_pr
 from pyradiator.radiator_channel import RadiatorChannel
 
 
-IS_HELP_MODE = any(x in sys.argv for x in ["-h", "--help", "list"])
-
-LOG_LEVEL = logging.ERROR if IS_HELP_MODE else logging.DEBUG
+LOG_LEVEL = logging.ERROR if is_quiet_mode() else logging.DEBUG
 FORMAT = "%(asctime)-15s %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=FORMAT, level=LOG_LEVEL)
 LOGGER = logging.getLogger(__name__)
