@@ -2,6 +2,7 @@ import argparse
 import collections
 import json
 import logging
+import os
 import sys
 
 import pygame
@@ -76,11 +77,8 @@ class StoreConfigFile(argparse.Action):
     @staticmethod
     def generate_config_file_on_request(value):
         if value == "generate":
-            config_dict = {
-                x.name: x.default for x in
-                get_command_line_arguments(get_display_info())
-            }
-            print("{}".format(json.dumps(config_dict, indent=4, sort_keys=True)))
+            settings = get_config_file_factory_settings()
+            print("{}".format(json.dumps(settings, indent=4, sort_keys=True)))
             sys.exit(0)
 
 
@@ -102,7 +100,7 @@ class StoreSize(argparse.Action):
 def get_command_line_arguments(display_info):
     return [
         CommandLineArgument(
-            name="--window-title",
+            name="window-title",
             help="Title of the radiator window.",
             default="PyRadiator",
             type=str,
@@ -111,7 +109,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--fps",
+            name="fps",
             help="Expected frames per second for the radiator.",
             default=60,
             type=int,
@@ -120,7 +118,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--fullscreen",
+            name="fullscreen",
             help="Display radiator in fullscreen mode.",
             default=False,
             type=None,
@@ -129,7 +127,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--window-width",
+            name="window-width",
             help="Width in pixels of the radiator.",
             default=int(display_info.current_w),
             type=int,
@@ -138,7 +136,7 @@ def get_command_line_arguments(display_info):
             const=display_info.current_w,
         ),
         CommandLineArgument(
-            name="--window-height",
+            name="window-height",
             help="Height in pixels of the radiator.",
             default=int(display_info.current_h),
             type=int,
@@ -147,7 +145,7 @@ def get_command_line_arguments(display_info):
             const=display_info.current_h,
         ),
         CommandLineArgument(
-            name="--margin-size",
+            name="margin-size",
             help="Margin size in pixels of the surfaces.",
             default=5,
             type=int,
@@ -156,7 +154,7 @@ def get_command_line_arguments(display_info):
             const=50,
         ),
         CommandLineArgument(
-            name="--main-surface-color",
+            name="main-surface-color",
             help="Color of the main surfaces.",
             default=BLACK,
             type=None,
@@ -165,7 +163,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--sub-surface-color",
+            name="sub-surface-color",
             help="Color of the sub-surfaces.",
             default=BLACK,
             type=None,
@@ -174,7 +172,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--static-fg-color",
+            name="static-fg-color",
             help="Foreground color of the no-signal static noise.",
             default=GRAY,
             type=None,
@@ -183,7 +181,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--static-bg-color",
+            name="static-bg-color",
             help="Background color of the no-signal static noise.",
             default=BLACK,
             type=None,
@@ -192,7 +190,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--font",
+            name="font",
             help="Font of the output-text. List system fonts with 'list' value.",
             default=pygame.font.get_default_font(),
             type=str,
@@ -201,7 +199,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--font-size",
+            name="font-size",
             help="Font-size of the output-text.",
             default=20,
             type=int,
@@ -210,7 +208,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--font-bold",
+            name="font-bold",
             help="Font of the output text is bold.",
             default=False,
             type=None,
@@ -219,7 +217,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--font-italic",
+            name="font-italic",
             help="Font of the output text is italic.",
             default=False,
             type=None,
@@ -228,7 +226,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--font-fg-color",
+            name="font-fg-color",
             help="Foreground color of the fonts.",
             default=WHITE,
             type=None,
@@ -237,7 +235,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--font-bg-color",
+            name="font-bg-color",
             help="Background color of the fonts.",
             default=BLACK,
             type=None,
@@ -246,7 +244,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--font-antialias",
+            name="font-antialias",
             help="Font of the output text is antialiased.",
             default=1,
             type=int,
@@ -255,7 +253,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--number-of-left-rows",
+            name="number-of-left-rows",
             help="Number of rows on the left side.",
             default=0,
             type=int,
@@ -264,7 +262,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--number-of-right-rows",
+            name="number-of-right-rows",
             help="Number of rows on the right side.",
             default=0,
             type=int,
@@ -273,7 +271,7 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
-            name="--config-file",
+            name="config-file",
             help="Configuration file path. Generate config file with 'generate' value",
             default="~/.config/pyradiator",
             type=str,
@@ -282,6 +280,33 @@ def get_command_line_arguments(display_info):
             const=None
         ),
     ]
+
+
+def get_complete_factory_settings():
+    return {
+        x.name: x.default for x in
+        get_command_line_arguments(get_display_info())
+    }
+
+
+def get_config_file_factory_settings():
+    settings = get_complete_factory_settings()
+    for option_to_omit in ["config-file"]:
+        settings.pop(option_to_omit)
+    return settings
+
+
+def get_config_file_settings():
+    try:
+        with open(os.path.expanduser("~/.config/pyradiator"), "r") as config_file:
+            return json.loads(config_file.read())
+    except IOError:
+        return {}
+
+
+def get_command_line_settings():
+    command_line_arguments = get_command_line_arguments(get_display_info())
+    return parse_command_line_arguments(command_line_arguments)
 
 
 def parse_command_line_arguments(command_line_arguments):
@@ -300,9 +325,16 @@ def add_command_line_arguments(parser, command_line_arguments):
     for i in command_line_arguments:
         kwargs = {k: v for k, v in vars(i).items() if v}
         option_string = kwargs.pop("name")
-        parser.add_argument(option_string, **kwargs)
+        parser.add_argument("--{}".format(option_string), **kwargs)
 
 
 def get_configuration():
+    # factory_settings = get_complete_factory_settings()
+    # print("factory configuration", factory_settings)
+    # config_file_settings = get_config_file_settings()
+    # print("config file settings", config_file_settings)
+    # command_line_settings = get_command_line_settings()
+    # print("command line settings", command_line_settings)
+
     command_line_arguments = get_command_line_arguments(get_display_info())
     return parse_command_line_arguments(command_line_arguments)
