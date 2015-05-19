@@ -36,7 +36,7 @@ def disable_mouse_events():
 
 
 def create_main_surface(config):
-    pygame.display.set_caption(config.title)
+    pygame.display.set_caption(config.window_title)
     resolution = (config.window_width, config.window_height)
     flags = pygame.DOUBLEBUF | pygame.HWSURFACE
     if config.fullscreen:
@@ -142,9 +142,6 @@ def main():
     initialize_pygame_modules()
     disable_mouse_events()
     config = get_configuration()
-    print config
-    print vars(config)
-    return
 
     main_surface = create_main_surface(config)
     subsurfaces = create_sub_surfaces(config, main_surface)

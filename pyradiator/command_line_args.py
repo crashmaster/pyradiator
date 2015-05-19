@@ -16,7 +16,7 @@ def is_quiet_mode():
 
 def get_display_info():
     display_info = pygame.display.Info()
-    LOGGER.debug("Display info: \n{}".format(display_info).rstrip())
+    LOGGER.debug("Display info: \n%s", str(display_info).rstrip())
     return display_info
 
 
@@ -282,31 +282,42 @@ def get_command_line_arguments(display_info):
     ]
 
 
+def normalize_settings_types(settings):
+    return json.loads(json.dumps(settings))
+
+
 def get_complete_factory_settings():
-    return {
-        x.name: x.default for x in
+    settings = normalize_settings_types({
+        x.name.replace("-", "_"): x.default for x in
         get_command_line_arguments(get_display_info())
-    }
+    })
+    LOGGER.debug("Factory settings: \n%s", settings)
+    return settings
 
 
 def get_config_file_factory_settings():
     settings = get_complete_factory_settings()
     for option_to_omit in ["config-file"]:
         settings.pop(option_to_omit)
+    LOGGER.debug("Config file settings: \n%s", settings)
     return settings
 
 
 def get_config_file_settings():
     try:
         with open(os.path.expanduser("~/.config/pyradiator"), "r") as config_file:
-            return json.loads(config_file.read())
+            return {
+                k.replace("-", "_"): v for k, v in
+                json.loads(config_file.read()).items()
+            }
     except IOError:
         return {}
 
 
 def get_command_line_settings():
     command_line_arguments = get_command_line_arguments(get_display_info())
-    return parse_command_line_arguments(command_line_arguments)
+    settings = vars(parse_command_line_arguments(command_line_arguments))
+    return normalize_settings_types(settings)
 
 
 def parse_command_line_arguments(command_line_arguments):
@@ -328,13 +339,30 @@ def add_command_line_arguments(parser, command_line_arguments):
         parser.add_argument("--{}".format(option_string), **kwargs)
 
 
-def get_configuration():
-    # factory_settings = get_complete_factory_settings()
-    # print("factory configuration", factory_settings)
-    # config_file_settings = get_config_file_settings()
-    # print("config file settings", config_file_settings)
-    # command_line_settings = get_command_line_settings()
-    # print("command line settings", command_line_settings)
+def merge_settings(factory_settings, config_file_settings, command_line_settings):
+    config_dict = merge_config_dicts(factory_settings, config_file_settings, command_line_settings)
+    return config_dict_to_namespace(config_dict)
 
-    command_line_arguments = get_command_line_arguments(get_display_info())
-    return parse_command_line_arguments(command_line_arguments)
+
+def merge_config_dicts(factory_settings, config_file_settings, command_line_settings):
+    config_dict = factory_settings.copy()
+    config_dict.update(config_file_settings)
+    for command_line_setting_k, command_line_setting_v in command_line_settings.items():
+        if command_line_setting_v != factory_settings[command_line_setting_k]:
+            config_dict[command_line_setting_k] = command_line_setting_v
+    return config_dict
+
+
+def config_dict_to_namespace(config_dict):
+    config_ns = argparse.Namespace()
+    for k, v in config_dict.items():
+        setattr(config_ns, k, v)
+    return config_ns
+
+
+def get_configuration():
+    factory_settings = get_complete_factory_settings()
+    config_file_settings = get_config_file_settings()
+    command_line_settings = get_command_line_settings()
+    config = merge_settings(factory_settings, config_file_settings, command_line_settings)
+    return config
