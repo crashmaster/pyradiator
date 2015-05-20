@@ -8,6 +8,7 @@ import sys
 import pygame
 
 LOGGER = logging.getLogger(__name__)
+DISPLAY_INFO = None
 
 
 def is_quiet_mode():
@@ -15,9 +16,12 @@ def is_quiet_mode():
 
 
 def get_display_info():
-    display_info = pygame.display.Info()
-    LOGGER.debug("Display info: \n%s", str(display_info).rstrip())
-    return display_info
+    if DISPLAY_INFO:
+        return DISPLAY_INFO
+    global DISPLAY_INFO
+    DISPLAY_INFO = pygame.display.Info()
+    LOGGER.debug("Display info: \n%s", str(DISPLAY_INFO).rstrip())
+    return DISPLAY_INFO
 
 
 CommandLineArgument = collections.namedtuple(
@@ -299,25 +303,27 @@ def get_config_file_factory_settings():
     settings = get_complete_factory_settings()
     for option_to_omit in ["config-file"]:
         settings.pop(option_to_omit)
-    LOGGER.debug("Config file settings: \n%s", settings)
     return settings
 
 
 def get_config_file_settings():
     try:
         with open(os.path.expanduser("~/.config/pyradiator"), "r") as config_file:
-            return {
+            settings = {
                 k.replace("-", "_"): v for k, v in
                 json.loads(config_file.read()).items()
             }
+            LOGGER.debug("Config file settings: \n%s", settings)
+            return settings
     except IOError:
         return {}
 
 
 def get_command_line_settings():
     command_line_arguments = get_command_line_arguments(get_display_info())
-    settings = vars(parse_command_line_arguments(command_line_arguments))
-    return normalize_settings_types(settings)
+    settings = normalize_settings_types(vars(parse_command_line_arguments(command_line_arguments)))
+    LOGGER.debug("Command line settings: \n%s", settings)
+    return settings
 
 
 def parse_command_line_arguments(command_line_arguments):
@@ -365,4 +371,5 @@ def get_configuration():
     config_file_settings = get_config_file_settings()
     command_line_settings = get_command_line_settings()
     config = merge_settings(factory_settings, config_file_settings, command_line_settings)
+    LOGGER.info("Configuration: \n%s", config)
     return config
