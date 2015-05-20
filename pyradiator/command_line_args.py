@@ -16,9 +16,9 @@ def is_quiet_mode():
 
 
 def get_display_info():
+    global DISPLAY_INFO
     if DISPLAY_INFO:
         return DISPLAY_INFO
-    global DISPLAY_INFO
     DISPLAY_INFO = pygame.display.Info()
     LOGGER.debug("Display info: \n%s", str(DISPLAY_INFO).rstrip())
     return DISPLAY_INFO
