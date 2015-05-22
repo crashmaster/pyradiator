@@ -283,6 +283,42 @@ def get_command_line_arguments(display_info):
             choices=None,
             const=None
         ),
+        CommandLineArgument(
+            name="channels",
+            help="Available channels",
+            default={
+                "ask_top": {
+                    "args": {},
+                    "channel_name": "top",
+                    "font_size": None,
+                    "update_period": 10
+                },
+                "ask_the_cow": {
+                    "args": {},
+                    "channel_name": "cowsay",
+                    "font_size": 26,
+                    "update_period": 11
+                },
+                "ask_w": {
+                    "args": {},
+                    "channel_name": "w",
+                    "font_size": None,
+                    "update_period": 12
+                },
+                "ask_finger": {
+                    "args": {
+                        "login_name": os.getlogin()
+                    },
+                    "channel_name": "finger",
+                    "font_size": None,
+                    "update_period": 13
+                }
+            },
+            type=None,
+            action=None,
+            choices=None,
+            const=None
+        ),
     ]
 
 
@@ -301,7 +337,7 @@ def get_complete_factory_settings():
 
 def get_config_file_factory_settings():
     settings = get_complete_factory_settings()
-    for option_to_omit in ["config-file"]:
+    for option_to_omit in ["config_file"]:
         settings.pop(option_to_omit)
     return settings
 
