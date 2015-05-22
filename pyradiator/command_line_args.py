@@ -284,6 +284,16 @@ def get_command_line_arguments(display_info):
             const=None
         ),
         CommandLineArgument(
+            name="screen-layout",
+            help="Layout of the radiator screen. Format: "
+                 "HeaderRows+MiddleLeftRows+MiddleRightRight+FooterRows",
+            default="0+2+2+0",
+            type=str,
+            action=None,  # TODO
+            choices=None,
+            const=None
+        ),
+        CommandLineArgument(
             name="channels",
             help="Available channels",
             default={
@@ -315,7 +325,7 @@ def get_command_line_arguments(display_info):
                 }
             },
             type=None,
-            action=None,
+            action=None,  # TODO
             choices=None,
             const=None
         ),
