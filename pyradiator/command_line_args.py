@@ -3,6 +3,7 @@ import collections
 import json
 import logging
 import os
+import re
 import sys
 
 import pygame
@@ -60,6 +61,19 @@ class StoreColor(argparse.Action):
         setattr(namespace, self.dest, COLORS[value])
 
 
+class StoreConfigFile(argparse.Action):
+    def __call__(self, parser, namespace, value, option_string):
+        self.generate_config_file_on_request(value)
+        setattr(namespace, self.dest, value)
+
+    @staticmethod
+    def generate_config_file_on_request(value):
+        if value == "generate":
+            settings = get_config_file_factory_settings()
+            print("{}".format(json.dumps(settings, indent=4, sort_keys=True)))
+            sys.exit(0)
+
+
 class StoreFont(argparse.Action):
     def __call__(self, parser, namespace, value, option_string):
         self.print_system_font_list_on_request(value)
@@ -73,17 +87,16 @@ class StoreFont(argparse.Action):
             sys.exit(0)
 
 
-class StoreConfigFile(argparse.Action):
+class StoreScreenLayout(argparse.Action):
     def __call__(self, parser, namespace, value, option_string):
-        self.generate_config_file_on_request(value)
+        self.verify_screen_layout(value)
         setattr(namespace, self.dest, value)
 
     @staticmethod
-    def generate_config_file_on_request(value):
-        if value == "generate":
-            settings = get_config_file_factory_settings()
-            print("{}".format(json.dumps(settings, indent=4, sort_keys=True)))
-            sys.exit(0)
+    def verify_screen_layout(value):
+        format_pattern = re.compile(r"(\d)\+(\d)\+(\d)\+(\d)")
+        if not format_pattern.match(value):
+            raise RuntimeError("Invalid screen layout: '{}'".format(value))  # TODO
 
 
 class StoreSize(argparse.Action):
@@ -286,10 +299,10 @@ def get_command_line_arguments(display_info):
         CommandLineArgument(
             name="screen-layout",
             help="Layout of the radiator screen. Format: "
-                 "HeaderRows+MiddleLeftRows+MiddleRightRight+FooterRows",
+                 "HeaderRows+MiddleLeftRows+MiddleRightRows+FooterRows",
             default="0+2+2+0",
             type=str,
-            action=None,  # TODO
+            action=StoreScreenLayout,
             choices=None,
             const=None
         ),
@@ -418,4 +431,5 @@ def get_configuration():
     command_line_settings = get_command_line_settings()
     config = merge_settings(factory_settings, config_file_settings, command_line_settings)
     LOGGER.info("Configuration: \n%s", config)
+    sys.exit(1)
     return config
