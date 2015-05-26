@@ -96,7 +96,12 @@ class StoreScreenLayout(argparse.Action):
     def verify_screen_layout(value):
         format_pattern = re.compile(r"(\d)\+(\d)\+(\d)\+(\d)")
         if not format_pattern.match(value):
-            raise RuntimeError("Invalid screen layout: '{}'".format(value))  # TODO
+            raise InvalidScreenLayout(value)
+
+
+class InvalidScreenLayout(Exception):
+
+    pass
 
 
 class StoreSize(argparse.Action):
