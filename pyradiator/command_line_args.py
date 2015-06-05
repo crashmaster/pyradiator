@@ -56,6 +56,11 @@ COLORS = collections.OrderedDict([
 ])
 
 
+class StoreChannels(argparse.Action):
+    def __call__(self, parser, namespace, value, option_string):
+        setattr(namespace, self.dest, json.loads(value))
+
+
 class StoreColor(argparse.Action):
     def __call__(self, parser, namespace, value, option_string):
         setattr(namespace, self.dest, COLORS[value])
@@ -314,7 +319,7 @@ def get_command_line_arguments(display_info):
         CommandLineArgument(
             name="channels",
             help="Available channels",
-            default={
+            default=json.dumps({
                 "top": {
                     "content_provider": "ask_top",
                     "content_provider_args": {},
@@ -357,9 +362,9 @@ def get_command_line_arguments(display_info):
                     "font_size": None,
                     "update_period": 30,
                 },
-            },
-            type=None,
-            action=None,  # TODO
+            }),
+            type=str,
+            action=StoreChannels,
             choices=None,
             const=None
         ),
