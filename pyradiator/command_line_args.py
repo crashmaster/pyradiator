@@ -315,32 +315,48 @@ def get_command_line_arguments(display_info):
             name="channels",
             help="Available channels",
             default={
-                "ask_top": {
-                    "args": {},
-                    "name": "top",
+                "top": {
+                    "content_provider": "ask_top",
+                    "content_provider_args": {},
+                    "surface_number": 0,
                     "font_size": None,
-                    "update_period": 10
+                    "update_period": 30,
                 },
-                "ask_the_cow": {
-                    "args": {},
-                    "name": "cowsay",
-                    "font_size": 26,
-                    "update_period": 11
-                },
-                "ask_w": {
-                    "args": {},
-                    "name": "w",
+                "cowsay": {
+                    "content_provider": "ask_the_cow",
+                    "content_provider_args": {},
+                    "surface_number": 1,
                     "font_size": None,
-                    "update_period": 12
+                    "update_period": 30,
                 },
-                "ask_finger": {
-                    "args": {
+                "w": {
+                    "content_provider": "ask_w",
+                    "content_provider_args": {},
+                    "surface_number": 2,
+                    "font_size": None,
+                    "update_period": 30,
+                },
+                "finger": {
+                    "content_provider": "ask_finger",
+                    "content_provider_args": {
                         "login_name": os.getlogin()
                     },
-                    "name": "finger",
+                    "surface_number": 3,
                     "font_size": None,
-                    "update_period": 13
-                }
+                    "update_period": 30,
+                },
+                "jenkins": {
+                    "content_provider": "ask_jenkins_jobs_status",
+                    "content_provider_args": {
+                        "jobs": {
+                            "url": None,
+                            "job_names": []
+                        }
+                    },
+                    "surface_number": 4,
+                    "font_size": None,
+                    "update_period": 30,
+                },
             },
             type=None,
             action=None,  # TODO
@@ -372,7 +388,7 @@ def get_config_file_factory_settings():
 
 def get_config_file_settings():
     try:
-        with open(os.path.expanduser("~/.config/pyradiator"), "r") as config_file:
+        with open(os.path.expanduser("~/.config/pyradiator.json"), "r") as config_file:
             config_file_content = config_file.read()
         if config_file_content:
             settings = {

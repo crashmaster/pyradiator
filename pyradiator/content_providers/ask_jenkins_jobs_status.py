@@ -1,4 +1,3 @@
-import collections
 import datetime
 import logging
 import re
@@ -20,8 +19,6 @@ COLOR_MAP = {
     "SUCCESS": (0, 255, 0),
 }
 JSON_API_URL = "/api/json"
-
-JenkinsJobs = collections.namedtuple("JenkinsJobs", ["url", "job_names"])
 
 
 def get_job_info(jenkins_url, job_name):
@@ -105,14 +102,16 @@ class AskJenkinsJobsStatus(object):
         table.align[self.COLUMN_1] = "l"
 
         try:
-            job_info_list = [get_job_info(self.jobs.url, x) for x in self.jobs.job_names]
+            job_info_list = [get_job_info(self.jobs["url"], x) for x in self.jobs["job_names"]]
             for job_info in job_info_list:
                 job_info_columns = [x.text for x in job_info]
                 table.add_row(job_info_columns)
         except Exception:
+            LOGGER.exception("Exception")
             return []
 
         table_lines = table.get_string().splitlines()
+        LOGGER.debug("Table to draw:\n%s", '\n'.join(table_lines))
         text = []
         for line in table_lines[:3]:
             text.append([ColoredString(line)])

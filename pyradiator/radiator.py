@@ -1,6 +1,6 @@
+import collections
 import contextlib
 import logging
-import random
 
 import pygame
 
@@ -18,6 +18,17 @@ LOG_LEVEL = logging.ERROR if is_quiet_mode() else logging.DEBUG
 FORMAT = "%(asctime)-15s %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(format=FORMAT, level=LOG_LEVEL)
 LOGGER = logging.getLogger(__name__)
+
+Show = collections.namedtuple(
+    "Show", [
+        "name",
+        "content_provider",
+        "content_provider_args",
+        "surface_number",
+        "font_size",
+        "update_period"
+    ]
+)
 
 
 def initialize_pygame_modules():
@@ -101,36 +112,37 @@ def loop(application_state, config, subsurfaces, channels):
 
 
 def create_channels(config, subsurfaces):
-    shows = get_configured_shows(config)
     return [
-        create_channel(config, subsurfaces[i], random.choice(shows))
-        for i in range(config.number_of_left_rows + config.number_of_right_rows)
+        create_channel(config, subsurfaces, show) for show in get_configured_shows(config)
     ]
 
 
 def get_configured_shows(config):
     return [
-        (
-            load_content_provider(name),
-            properties["args"],
-            properties["name"],
+        Show(
+            name,
+            load_content_provider(properties["content_provider"]),
+            properties["content_provider_args"],
+            properties["surface_number"],
             properties["font_size"],
             properties["update_period"]
-        ) for name, properties in config.channels.items()
+        )
+        for name, properties in config.channels.items()
     ]
 
 
-def create_channel(config, subsurface, show):
+def create_channel(config, subsurfaces, show):
+    LOGGER.debug("Create channel: %s %s", show.name, subsurfaces[show.surface_number].get_abs_offset())
     return RadiatorChannel(
         config=config,
-        name=show[2],
-        surface=subsurface,
-        input_functor=show[0](**show[1]),
+        name=show.name,
+        surface=subsurfaces[show.surface_number],
+        input_functor=show.content_provider(**show.content_provider_args),
         output_functor=PrintText(config=config,
-                                 surface=subsurface,
+                                 surface=subsurfaces[show.surface_number],
                                  position=(0, 0),
-                                 font=create_font(config, show[3])),
-        update_period=show[4]
+                                 font=create_font(config, show.font_size)),
+        update_period=show.update_period
     )
 
 

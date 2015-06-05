@@ -9,7 +9,7 @@ def _execute_command(function, *args, **kwargs):
     else:
         output = process.communicate()[0].decode()
         if output:
-            return output.splitlines()
+            return output.replace('\t', "        ").splitlines()
     return []
 
 
