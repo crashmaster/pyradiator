@@ -1,4 +1,3 @@
-import os
 import contextlib
 import logging
 import random
@@ -102,28 +101,37 @@ def loop(application_state, config, subsurfaces, channels):
 
 
 def create_channels(config, subsurfaces):
-    shows = [
-        ("top", load_content_provider("ask_top"), {}, None, 10),
-        ("cowsay", load_content_provider("ask_the_cow"), {}, 26, 11),
-        ("w", load_content_provider("ask_w"), {}, None, 12),
-        ("finger", load_content_provider("ask_finger"), {"login_name": os.getlogin()}, None, 13),
+    shows = get_configured_shows(config)
+    return [
+        create_channel(config, subsurfaces[i], random.choice(shows))
+        for i in range(config.number_of_left_rows + config.number_of_right_rows)
     ]
-    channels = []
-    for i in range(config.number_of_left_rows + config.number_of_right_rows):
-        show = random.choice(shows)
-        input_functor = show[1](**show[2])
-        output_functor = PrintText(config=config,
-                                   surface=subsurfaces[i],
-                                   position=(0, 0),
-                                   font=create_font(config, show[3]))
-        channels.append(
-            RadiatorChannel(config=config,
-                            name=show[0],
-                            surface=subsurfaces[i],
-                            input_functor=input_functor,
-                            output_functor=output_functor,
-                            update_period=show[4]))
-    return channels
+
+
+def get_configured_shows(config):
+    return [
+        (
+            load_content_provider(name),
+            properties["args"],
+            properties["name"],
+            properties["font_size"],
+            properties["update_period"]
+        ) for name, properties in config.channels.items()
+    ]
+
+
+def create_channel(config, subsurface, show):
+    return RadiatorChannel(
+        config=config,
+        name=show[2],
+        surface=subsurface,
+        input_functor=show[0](**show[1]),
+        output_functor=PrintText(config=config,
+                                 surface=subsurface,
+                                 position=(0, 0),
+                                 font=create_font(config, show[3])),
+        update_period=show[4]
+    )
 
 
 @contextlib.contextmanager

@@ -317,19 +317,19 @@ def get_command_line_arguments(display_info):
             default={
                 "ask_top": {
                     "args": {},
-                    "channel_name": "top",
+                    "name": "top",
                     "font_size": None,
                     "update_period": 10
                 },
                 "ask_the_cow": {
                     "args": {},
-                    "channel_name": "cowsay",
+                    "name": "cowsay",
                     "font_size": 26,
                     "update_period": 11
                 },
                 "ask_w": {
                     "args": {},
-                    "channel_name": "w",
+                    "name": "w",
                     "font_size": None,
                     "update_period": 12
                 },
@@ -337,7 +337,7 @@ def get_command_line_arguments(display_info):
                     "args": {
                         "login_name": os.getlogin()
                     },
-                    "channel_name": "finger",
+                    "name": "finger",
                     "font_size": None,
                     "update_period": 13
                 }
@@ -373,12 +373,16 @@ def get_config_file_factory_settings():
 def get_config_file_settings():
     try:
         with open(os.path.expanduser("~/.config/pyradiator"), "r") as config_file:
+            config_file_content = config_file.read()
+        if config_file_content:
             settings = {
-                k.replace("-", "_"): v for k, v in
-                json.loads(config_file.read()).items()
+                k.replace("-", "_"): v
+                for k, v in json.loads(config_file_content).items()
             }
             LOGGER.debug("Config file settings: \n%s", settings)
             return settings
+        else:
+            return {}
     except IOError:
         return {}
 
@@ -404,7 +408,7 @@ def create_command_line_argument_parser():
 
 def add_command_line_arguments(parser, command_line_arguments):
     for i in command_line_arguments:
-        kwargs = {k: v for k, v in vars(i).items() if v}
+        kwargs = {k: v for k, v in vars(i).items() if v is not None}
         option_string = kwargs.pop("name")
         parser.add_argument("--{}".format(option_string), **kwargs)
 
@@ -436,5 +440,4 @@ def get_configuration():
     command_line_settings = get_command_line_settings()
     config = merge_settings(factory_settings, config_file_settings, command_line_settings)
     LOGGER.info("Configuration: \n%s", config)
-    sys.exit(1)
     return config
