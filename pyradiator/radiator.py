@@ -113,7 +113,8 @@ def loop(application_state, config, subsurfaces, channels):
 
 def create_channels(config, subsurfaces):
     return [
-        create_channel(config, subsurfaces, show) for show in get_configured_shows(config)
+        create_channel(config, subsurfaces, show)
+        for show in get_configured_shows(config)
     ]
 
 
@@ -132,14 +133,15 @@ def get_configured_shows(config):
 
 
 def create_channel(config, subsurfaces, show):
-    LOGGER.debug("Create channel: %s %s", show.name, subsurfaces[show.surface_number].get_abs_offset())
+    surface = subsurfaces[show.surface_number]
+    LOGGER.debug("Create channel: %s %s", show.name, surface.get_abs_offset())
     return RadiatorChannel(
         config=config,
         name=show.name,
-        surface=subsurfaces[show.surface_number],
+        surface=surface,
         input_functor=show.content_provider(**show.content_provider_args),
         output_functor=PrintText(config=config,
-                                 surface=subsurfaces[show.surface_number],
+                                 surface=surface,
                                  position=(0, 0),
                                  font=create_font(config, show.font_size)),
         update_period=show.update_period

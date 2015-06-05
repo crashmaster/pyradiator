@@ -91,10 +91,10 @@ class AskJenkinsJobsStatus(object):
     COLUMN_1 = "Jenkins Job Name                     "
     COLUMN_2 = " Status "
     COLUMN_3 = "     E.T.A.     "
+    ROW_PATTERN = re.compile(r"(\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|)")
 
     def __init__(self, jobs):
         self.jobs = jobs
-        self.pretty_table_row_pattern = re.compile(r"(\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|\s+)(.*)(\s+\|)")
 
     def __call__(self):
         LOGGER.debug("{}.__call__ called".format(self.__class__.__name__))
@@ -116,7 +116,7 @@ class AskJenkinsJobsStatus(object):
         for line in table_lines[:3]:
             text.append([ColoredString(line)])
         for i, line in enumerate(table_lines[3:-1]):
-            hit = self.pretty_table_row_pattern.match(line)
+            hit = self.ROW_PATTERN.match(line)
             if hit:
                 text.append([
                     ColoredString(hit.group(1)),
