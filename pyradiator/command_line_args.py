@@ -218,7 +218,8 @@ def get_command_line_arguments(display_info):
         ),
         CommandLineArgument(
             name="font",
-            help="Font of the output-text. List system fonts with 'list' value.",
+            help="Font of the output-text. "
+                 "List system fonts with 'list' value.",
             default=pygame.font.get_default_font(),
             type=str,
             action=StoreFont,
@@ -299,7 +300,8 @@ def get_command_line_arguments(display_info):
         ),
         CommandLineArgument(
             name="config-file",
-            help="Configuration file path. Generate config file with 'generate' value",
+            help="Configuration file path. "
+                 "Generate config file with 'generate' value",
             default="~/.config/pyradiator",
             type=str,
             action=StoreConfigFile,
@@ -393,7 +395,8 @@ def get_config_file_factory_settings():
 
 def get_config_file_settings():
     try:
-        with open(os.path.expanduser("~/.config/pyradiator.json"), "r") as config_file:
+        config_file_name = os.path.expanduser("~/.config/pyradiator.json")
+        with open(config_file_name, "r") as config_file:
             config_file_content = config_file.read()
         if config_file_content:
             settings = {
