@@ -111,7 +111,18 @@ def loop(application_state, config, subsurfaces, channels):
         pygame.time.wait(0)
 
 
+class InvalidNumberOfChannels(Exception):
+    pass
+
+
 def create_channels(config, subsurfaces):
+    if len(config.channels) != len(subsurfaces):
+        raise InvalidNumberOfChannels(
+            "\nNumber of channels: {}\nNumber of surfaces: {}".format(
+                len(config.channels),
+                len(subsurfaces)
+            )
+        )
     return [
         create_channel(config, subsurfaces, show) for show in get_configured_shows(config)
     ]
