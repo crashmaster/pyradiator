@@ -2,6 +2,7 @@ import getpass
 import json
 import urllib
 
+import prettytable
 import requests
 
 from pyradiator.common import ColoredString
@@ -30,6 +31,26 @@ def get_gerrit_query(project, team):
     return " AND ".join([project, status, ower_in])
 
 
+def gerrit_response_to_pretty_table(response):
+    column_1 = "Created"
+    column_2 = "Owner"
+    column_3 = "Subject"
+    table = prettytable.PrettyTable([column_1, column_2, column_3])
+    table.align[column_1] = "l"
+    table.align[column_2] = "l"
+    table.align[column_3] = "l"
+    table.sortby = column_1
+
+    for line in response:
+        table.add_row([
+            line[column_1.lower()][:-6],
+            line[column_2.lower()]["name"],
+            line[column_3.lower()]
+        ])
+
+    return table
+
+
 class AskGerritOpenChanges(object):
 
     def __init__(self, gerrit_url, project, team):
@@ -37,7 +58,10 @@ class AskGerritOpenChanges(object):
         self.authenticator = get_gerrit_authenticator()
 
     def __call__(self):
-        response = requests.get(self.query_url, auth=self.authenticator, verify=True)
-        json_response = json.loads(response.text[4:])
-        print json_response
-        return [[ColoredString("text", (255, 255, 50))]]
+        json_response = requests.get(self.query_url, auth=self.authenticator, verify=True)
+        response = json.loads(json_response.text[4:])
+
+        return [
+            [ColoredString(x)]
+            for x in gerrit_response_to_pretty_table(response).get_string().splitlines()
+        ]
