@@ -103,9 +103,9 @@ def loop(application_state, config, subsurfaces, channels):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 application_state.stop_main_loop()
-            for channel in channels:
-                if channel.no_signal():
-                    channel.display_static(clock)
+        for channel in channels:
+            if channel.no_signal():
+                channel.display_static(clock)
         pygame.display.flip()
 
         pygame.time.wait(0)
