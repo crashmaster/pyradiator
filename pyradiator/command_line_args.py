@@ -2,6 +2,7 @@ import argparse
 import collections
 import json
 import logging
+import operator
 import os
 import re
 import sys
@@ -125,7 +126,7 @@ class StoreSize(argparse.Action):
 
 
 def get_command_line_arguments(display_info):
-    return [
+    return sorted([
         CommandLineArgument(
             name="window-title",
             help="Title of the radiator window.",
@@ -370,7 +371,7 @@ def get_command_line_arguments(display_info):
             choices=None,
             const=None
         ),
-    ]
+    ], key=operator.attrgetter("name"))
 
 
 def normalize_settings_types(settings):
