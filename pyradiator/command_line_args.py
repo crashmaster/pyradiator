@@ -93,6 +93,10 @@ class StoreFont(argparse.Action):
             sys.exit(0)
 
 
+class InvalidScreenLayout(Exception):
+    pass
+
+
 class StoreScreenLayout(argparse.Action):
     def __call__(self, parser, namespace, value, option_string):
         self.verify_screen_layout(value)
@@ -103,11 +107,6 @@ class StoreScreenLayout(argparse.Action):
         format_pattern = re.compile(r"(\d)\+(\d)\+(\d)\+(\d)")
         if not format_pattern.match(value):
             raise InvalidScreenLayout(value)
-
-
-class InvalidScreenLayout(Exception):
-
-    pass
 
 
 class StoreSize(argparse.Action):
@@ -370,6 +369,15 @@ def get_command_line_arguments(display_info):
             action=StoreChannels,
             choices=None,
             const=None
+        ),
+        CommandLineArgument(    # TODO: this ones default value depends on margin, do some prio sort before processing sys.argv
+            name="header-rows-width",
+            help="Width in pixels of the header rows.",
+            default=int(display_info.current_w),
+            type=int,
+            action=StoreSize,
+            choices=None,
+            const=display_info.current_w,
         ),
     ], key=operator.attrgetter("name"))
 
