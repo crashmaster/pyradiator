@@ -65,12 +65,9 @@ class RadiatorChannel(object):
     def no_signal(self):
         return self.consumer.no_data_from_the_queue
 
-    def display_static(self, clock):
+    def display_static(self):
         x_offset = RRR(30) - 30
         y_offset = RRR(30) - 30
         self.static.scroll(x_offset, y_offset)
         self.surface.blit(self.static, (0, 0))
         self.surface.blit(self.overlay, (5, 5))
-        if not pygame.event.peek(pygame.USEREVENT):
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT))
-        clock.tick(self.config.fps)

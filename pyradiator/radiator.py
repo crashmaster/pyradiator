@@ -96,7 +96,6 @@ def create_sub_surfaces(config, main_surface):
 
 
 def loop(application_state, config, subsurfaces, channels):
-    clock = pygame.time.Clock()
     LOGGER.debug("Enter main loop")
     application_state.set_application_state(application_state.MAIN_LOOP)
     while application_state.running:
@@ -105,10 +104,8 @@ def loop(application_state, config, subsurfaces, channels):
                 application_state.stop_main_loop()
         for channel in channels:
             if channel.no_signal():
-                channel.display_static(clock)
+                channel.display_static()
         pygame.display.flip()
-
-        pygame.time.wait(0)
 
 
 class InvalidNumberOfChannels(Exception):
