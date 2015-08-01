@@ -451,6 +451,7 @@ def get_command_line_settings():
 def parse_command_line_arguments(command_line_arguments):
     parser = create_command_line_argument_parser()
     add_command_line_arguments(parser, command_line_arguments)
+# TODO ->
     print(sys.argv)
     return parser.parse_args()
 
