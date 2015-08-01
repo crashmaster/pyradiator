@@ -26,17 +26,25 @@ def get_display_info():
     return DISPLAY_INFO
 
 
-CommandLineArgument = collections.namedtuple(
-    "CommandLineArgument", [
-        "name",
-        "help",
-        "default",
-        "type",
-        "action",
-        "choices",
-        "const"
+class CommandLineArgument(object):
+    PARAMETERS_NOT_PASSED_TO_ARGPARSE = [
+        "option_has_parameter",
     ]
-)
+
+    def __init__(self, name, help, default, type, action, choices,
+                 const, option_has_parameter):
+        self.name = name
+        self.help = help
+        self.default = default
+        self.type = type
+        self.action = action
+        self.choices = choices
+        self.const = const
+        self.option_has_parameter = option_has_parameter
+        self.__dict__ = {
+            key: value for key, value in self.__dict__.items()
+            if key not in self.PARAMETERS_NOT_PASSED_TO_ARGPARSE
+        }
 
 
 BLACK = (0, 0, 0)
@@ -214,6 +222,7 @@ def get_command_line_arguments(display_info):
             action=StoreColor,
             choices=COLORS.keys(),
             const=None,
+            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="font",
@@ -433,8 +442,8 @@ def get_config_file_settings():
 
 
 def get_command_line_settings():
-    command_line_arguments = get_command_line_arguments(get_display_info())
-    settings = normalize_settings_types(vars(parse_command_line_arguments(command_line_arguments)))
+    cli_args = get_command_line_arguments(get_display_info())
+    settings = normalize_settings_types(vars(parse_command_line_arguments(cli_args)))
     LOGGER.debug("Command line settings: \n%s", settings)
     return settings
 
@@ -467,9 +476,9 @@ def merge_settings(factory_settings, config_file_settings, command_line_settings
 def merge_config_dicts(factory_settings, config_file_settings, command_line_settings):
     config_dict = factory_settings.copy()
     config_dict.update(config_file_settings)
-    for command_line_setting_k, command_line_setting_v in command_line_settings.items():
-        if command_line_setting_v != factory_settings[command_line_setting_k]:
-            config_dict[command_line_setting_k] = command_line_setting_v
+    for key, value in command_line_settings.items():
+        if value != factory_settings[key]:
+            config_dict[key] = value
     return config_dict
 
 
@@ -484,6 +493,10 @@ def get_configuration():
     factory_settings = get_complete_factory_settings()
     config_file_settings = get_config_file_settings()
     command_line_settings = get_command_line_settings()
-    config = merge_settings(factory_settings, config_file_settings, command_line_settings)
+    config = merge_settings(
+        factory_settings,
+        config_file_settings,
+        command_line_settings
+    )
     LOGGER.info("Configuration: \n%s", config)
     return config
