@@ -27,12 +27,7 @@ def get_display_info():
 
 
 class CommandLineArgument(object):
-    PARAMETERS_NOT_PASSED_TO_ARGPARSE = [
-        "option_has_parameter",
-    ]
-
-    def __init__(self, name, help, default, type, action, choices,
-                 const, option_has_parameter):
+    def __init__(self, name, help, default, type, action, choices, const):
         self.name = name
         self.help = help
         self.default = default
@@ -40,10 +35,8 @@ class CommandLineArgument(object):
         self.action = action
         self.choices = choices
         self.const = const
-        self.option_has_parameter = option_has_parameter
         self.__dict__ = {
             key: value for key, value in self.__dict__.items()
-            if key not in self.PARAMETERS_NOT_PASSED_TO_ARGPARSE
         }
 
 
@@ -142,7 +135,6 @@ def get_command_line_arguments(display_info):
             action=None,
             choices=None,
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="fullscreen",
@@ -152,7 +144,6 @@ def get_command_line_arguments(display_info):
             action="store_true",
             choices=None,
             const=None,
-            option_has_parameter=False,
         ),
         CommandLineArgument(
             name="window-width",
@@ -162,7 +153,6 @@ def get_command_line_arguments(display_info):
             action=StoreSize,
             choices=None,
             const=display_info.current_w,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="window-height",
@@ -172,7 +162,6 @@ def get_command_line_arguments(display_info):
             action=StoreSize,
             choices=None,
             const=display_info.current_h,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="margin-size",
@@ -182,7 +171,6 @@ def get_command_line_arguments(display_info):
             action=StoreSize,
             choices=None,
             const=50,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="main-surface-color",
@@ -192,7 +180,6 @@ def get_command_line_arguments(display_info):
             action=StoreColor,
             choices=COLORS.keys(),
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="sub-surface-color",
@@ -202,7 +189,6 @@ def get_command_line_arguments(display_info):
             action=StoreColor,
             choices=COLORS.keys(),
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="static-fg-color",
@@ -212,7 +198,6 @@ def get_command_line_arguments(display_info):
             action=StoreColor,
             choices=COLORS.keys(),
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="static-bg-color",
@@ -222,7 +207,6 @@ def get_command_line_arguments(display_info):
             action=StoreColor,
             choices=COLORS.keys(),
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="font",
@@ -233,7 +217,6 @@ def get_command_line_arguments(display_info):
             action=StoreFont,
             choices=None,
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="font-size",
@@ -243,7 +226,6 @@ def get_command_line_arguments(display_info):
             action=None,
             choices=None,
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="font-bold",
@@ -253,7 +235,6 @@ def get_command_line_arguments(display_info):
             action="store_true",
             choices=None,
             const=None,
-            option_has_parameter=False,
         ),
         CommandLineArgument(
             name="font-italic",
@@ -263,7 +244,6 @@ def get_command_line_arguments(display_info):
             action="store_true",
             choices=None,
             const=None,
-            option_has_parameter=False,
         ),
         CommandLineArgument(
             name="font-fg-color",
@@ -273,7 +253,6 @@ def get_command_line_arguments(display_info):
             action=StoreColor,
             choices=COLORS.keys(),
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="font-bg-color",
@@ -283,17 +262,15 @@ def get_command_line_arguments(display_info):
             action=StoreColor,
             choices=COLORS.keys(),
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(    # TODO: True/False?
             name="font-antialias",
             help="Font of the output text is antialiased.",
-            default=1,
-            type=int,
-            action=None,
-            choices=[0, 1],
+            default=True,
+            type=None,
+            action="store_true",
+            choices=None,
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="number-of-left-rows",
@@ -303,7 +280,6 @@ def get_command_line_arguments(display_info):
             action=None,
             choices=[0, 1, 2, 3, 4],
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="number-of-right-rows",
@@ -313,7 +289,6 @@ def get_command_line_arguments(display_info):
             action=None,
             choices=[0, 1, 2, 3, 4],
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="config-file",
@@ -324,7 +299,6 @@ def get_command_line_arguments(display_info):
             action=StoreConfigFile,
             choices=None,
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="screen-layout",
@@ -338,7 +312,6 @@ def get_command_line_arguments(display_info):
             action=StoreScreenLayout,
             choices=None,
             const=None,
-            option_has_parameter=True,
         ),
         CommandLineArgument(
             name="channels",
@@ -391,7 +364,6 @@ def get_command_line_arguments(display_info):
             action=StoreChannels,
             choices=None,
             const=None,
-            option_has_parameter=True,
         ),
     ], key=operator.attrgetter("name"))
 

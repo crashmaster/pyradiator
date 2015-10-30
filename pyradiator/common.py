@@ -47,9 +47,11 @@ class PrintText(object):
         text_surface = self.surface.copy()
         for line in lines_to_print:
             for line_part in line:
-                rendered_text = self.font.render(line_part.text,
-                                                 self.config.font_antialias,
-                                                 line_part.color)
+                rendered_text = self.font.render(
+                    line_part.text,
+                    1 if self.config.font_antialias else 0,
+                    line_part.color
+                )
                 text_surface.blit(rendered_text, (position_x, position_y))
                 position_x += rendered_text.get_width()
             position_y += self.text_y_offset
