@@ -318,7 +318,7 @@ def get_command_line_arguments(display_info):
         CommandLineArgument(
             name="config-file",
             help="Configuration file path. "
-                 "Generate config file with 'generate' value",
+                 "Generate config file with 'generate' value.",
             default="~/.config/pyradiator",
             type=str,
             action=StoreConfigFile,
@@ -329,7 +329,10 @@ def get_command_line_arguments(display_info):
         CommandLineArgument(
             name="screen-layout",
             help="Layout of the radiator screen. Format: "
-                 "HeaderRows+MiddleLeftRows+MiddleRightRows+FooterRows",
+                 "Number of Header Rows + "
+                 "Number of Middle Left Rows + "
+                 "Number of Middle Right Rows + "
+                 "Number of Footer Rows",
             default="0+2+2+0",
             type=str,
             action=StoreScreenLayout,
@@ -390,16 +393,6 @@ def get_command_line_arguments(display_info):
             const=None,
             option_has_parameter=True,
         ),
-        CommandLineArgument(    # TODO: this ones default value depends on margin, do some prio sort before processing sys.argv
-            name="header-rows-width",
-            help="Width in pixels of the header rows.",
-            default=int(display_info.current_w),
-            type=int,
-            action=StoreSize,
-            choices=None,
-            const=display_info.current_w,
-            option_has_parameter=True,
-        ),
     ], key=operator.attrgetter("name"))
 
 
@@ -451,8 +444,6 @@ def get_command_line_settings():
 def parse_command_line_arguments(command_line_arguments):
     parser = create_command_line_argument_parser()
     add_command_line_arguments(parser, command_line_arguments)
-# TODO ->
-    print(sys.argv)
     return parser.parse_args()
 
 
