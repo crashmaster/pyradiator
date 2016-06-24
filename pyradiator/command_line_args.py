@@ -11,6 +11,7 @@ import pygame
 
 LOGGER = logging.getLogger(__name__)
 DISPLAY_INFO = None
+DEFAULT_CONFIG_FILE = "~/.config/pyradiator.json"
 
 
 def is_quiet_mode():
@@ -294,7 +295,7 @@ def get_command_line_arguments(display_info):
             name="config-file",
             help="Configuration file path. "
                  "Generate config file with 'generate' value.",
-            default="~/.config/pyradiator",
+            default=DEFAULT_CONFIG_FILE,
             type=str,
             action=StoreConfigFile,
             choices=None,
@@ -390,7 +391,7 @@ def get_config_file_factory_settings():
 
 def get_config_file_settings():
     try:
-        config_file_name = os.path.expanduser("~/.config/pyradiator.json")
+        config_file_name = os.path.expanduser(DEFAULT_CONFIG_FILE)
         with open(config_file_name, "r") as config_file:
             config_file_content = config_file.read()
         if config_file_content:
