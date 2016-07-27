@@ -46,11 +46,15 @@ class RadiatorChannel(object):
         self.static = create_static_surface(self.config, self.surface)
         self.overlay = create_no_signal_overlay(self.config, name)
         self.dispatcher = Dispatcher()
-        self.producer = Producer(update_period,
-                                 self.dispatcher.input_queue,
-                                 input_functor)
-        self.consumer = Consumer(self.dispatcher.output_queue,
-                                 output_functor)
+        self.producer = Producer(
+            update_period,
+            self.dispatcher.input_queue,
+            input_functor
+        )
+        self.consumer = Consumer(
+            self.dispatcher.output_queue,
+            output_functor
+        )
 
     def turn_on(self):
         self.dispatcher.start()
@@ -64,6 +68,12 @@ class RadiatorChannel(object):
 
     def no_signal(self):
         return self.consumer.no_data_from_the_queue
+
+    def do_update(self):
+        return self.consumer.request_update
+
+    def ack_update(self):
+        self.consumer.request_update = False
 
     def display_static(self):
         x_offset = RRR(30) - 30

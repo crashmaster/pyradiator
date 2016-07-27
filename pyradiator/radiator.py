@@ -95,17 +95,29 @@ def create_sub_surfaces(config, main_surface):
     ]
 
 
-def loop(application_state, config, subsurfaces, channels):
+def loop(application_state, config, subsurfaces, clock, channels):
     LOGGER.debug("Enter main loop")
     application_state.set_application_state(application_state.MAIN_LOOP)
+    do_flip = False
     while application_state.running:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                LOGGER.debug("Quit")
                 application_state.stop_main_loop()
         for channel in channels:
             if channel.no_signal():
                 channel.display_static()
-        pygame.display.flip()
+                fps = 25
+                do_flip = True
+            if channel.do_update():
+                channel.ack_update()
+                do_flip = True
+                fps = 5
+        if do_flip:
+            LOGGER.debug("Flip")
+            pygame.display.flip()
+            do_flip = False
+        clock.tick(fps)
 
 
 class InvalidNumberOfChannels(Exception):
@@ -148,10 +160,12 @@ def create_channel(config, subsurfaces, show):
         name=show.name,
         surface=surface,
         input_functor=show.content_provider(**show.content_provider_args),
-        output_functor=PrintText(config=config,
-                                 surface=surface,
-                                 position=(0, 0),
-                                 font=create_font(config, show.font_size)),
+        output_functor=PrintText(
+            config=config,
+            surface=surface,
+            position=(0, 0),
+            font=create_font(config, show.font_size)
+        ),
         update_period=show.update_period
     )
 
@@ -173,6 +187,7 @@ def main():
     disable_mouse_events()
     config = get_configuration()
 
+    clock = pygame.time.Clock()
     main_surface = create_main_surface(config)
     subsurfaces = create_sub_surfaces(config, main_surface)
 
@@ -182,4 +197,4 @@ def main():
     channels = create_channels(config, subsurfaces)
 
     with turn_on_channels(application_state, channels):
-        loop(application_state, config, subsurfaces, channels)
+        loop(application_state, config, subsurfaces, clock, channels)
