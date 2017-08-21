@@ -7,6 +7,7 @@ import requests
 import prettytable
 
 from pyradiator.common import ColoredString
+from pyradiator.common import get_authenticator
 
 
 LOGGER = logging.getLogger(__name__)
@@ -19,6 +20,9 @@ COLOR_MAP = {
     "SUCCESS": (0, 255, 0),
 }
 JSON_API_URL = "/api/json"
+
+
+AUTHENTICATOR = get_authenticator()
 
 
 def get_job_info(jenkins_url, job_name):
@@ -34,11 +38,11 @@ def get_job_info(jenkins_url, job_name):
 
 
 def get_job_summary(jenkins_url, job_name):
-    return requests.get(jenkins_url + job_name + JSON_API_URL).json()
+    return requests.get(jenkins_url + "job/" + job_name + JSON_API_URL, auth=AUTHENTICATOR).json()
 
 
 def get_build_info(job_summary, build_number):
-    return requests.get(job_summary["builds"][build_number]["url"] + JSON_API_URL).json()
+    return requests.get(job_summary["builds"][build_number]["url"] + JSON_API_URL, auth=AUTHENTICATOR).json()
 
 
 def get_job_name(job_summary, last_build_info):
@@ -47,7 +51,7 @@ def get_job_name(job_summary, last_build_info):
 
 
 def get_current_build_info(job_summary):
-    return requests.get(job_summary["builds"][CURRENT_BUILD]["url"] + JSON_API_URL).json()
+    return requests.get(job_summary["builds"][CURRENT_BUILD]["url"] + JSON_API_URL, auth=AUTHENTICATOR).json()
 
 
 def get_job_status(build_info):

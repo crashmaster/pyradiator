@@ -1,4 +1,3 @@
-import getpass
 import json
 import urllib
 
@@ -6,12 +5,6 @@ import prettytable
 import requests
 
 from pyradiator.common import ColoredString
-
-
-def get_gerrit_authenticator():
-    user = raw_input("User: ")
-    password = getpass.getpass()
-    return requests.auth.HTTPBasicAuth(user, password)
 
 
 def get_gerrit_query_url(gerrit_url, project, team):
@@ -35,7 +28,7 @@ class AskGerritOpenChanges(object):
 
     def __init__(self, gerrit_url, project, team):
         self.query_url = get_gerrit_query_url(gerrit_url, project, team)
-        self.authenticator = get_gerrit_authenticator()
+        self.authenticator = get_authenticator()
 
     def __call__(self):
         response = self.get_open_gerrit_changes()

@@ -1,6 +1,14 @@
+import getpass
 import math
 
 import pygame
+import requests
+
+
+def get_authenticator():
+    user = input("User: ")
+    password = getpass.getpass()
+    return requests.auth.HTTPBasicAuth(user, password)
 
 
 def create_font(config, font_size=None):

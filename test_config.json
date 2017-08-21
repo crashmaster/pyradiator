@@ -1,0 +1,66 @@
+{
+    "channels": {
+        "jenkins": {
+            "update_period": 15,
+            "font_size": null,
+            "content_provider": "ask_jenkins_jobs_status",
+            "content_provider_args": {
+                "jobs": {
+                    "url": "https://fem002-eiffel018.rnd.ki.sw.ericsson.se:8443/jenkins/view/lambda-view/",
+                    "job_names": [
+                        "lambda-ecs-watchmen-build-package",
+                        "lambda-ecs-watchmen-install-packages",
+                        "lambda-ecs-watchmen-run-feature-tests",
+                        "lambda-ecs-watchmen-run-code-checkers",
+                        "lambda-ecs-watchmen-run-unit-tests",
+                        "lambda-ecs-watchmen-build-papi-documentation"
+                    ]
+                }
+            },
+            "surface_number": 0
+        }
+    },
+    "font": "dejavusansmono",
+    "font_antialias": true,
+    "font_bg_color": [
+        0,
+        0,
+        0
+    ],
+    "font_bold": false,
+    "font_fg_color": [
+        255,
+        255,
+        255
+    ],
+    "font_italic": false,
+    "font_size": 18,
+    "fullscreen": false,
+    "main_surface_color": [
+        0,
+        0,
+        0
+    ],
+    "margin_size": 5,
+    "number_of_left_rows": 1,
+    "number_of_right_rows": 0,
+    "screen_layout": "0+2+2+0",
+    "static_bg_color": [
+        0,
+        0,
+        0
+    ],
+    "static_fg_color": [
+        180,
+        180,
+        180
+    ],
+    "sub_surface_color": [
+        0,
+        0,
+        0
+    ],
+    "window_height": 768,
+    "window_title": "PyRadiator",
+    "window_width": 1024
+}

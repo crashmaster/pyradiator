@@ -78,7 +78,14 @@ class StoreConfigFile(argparse.Action):
     def generate_config_file_on_request(value):
         if value == "generate":
             settings = get_config_file_factory_settings()
-            print("{}".format(json.dumps(settings, indent=4, sort_keys=True)))
+            print(
+                bytes(
+                    "{}".format(
+                        json.dumps(settings, indent=4, sort_keys=True)
+                    ),
+                    'ascii'
+                ).decode('unicode-escape')
+            )
             sys.exit(0)
 
 
@@ -389,9 +396,9 @@ def get_config_file_factory_settings():
     return settings
 
 
-def get_config_file_settings():
+def get_config_file_settings(command_line_settings):
     try:
-        config_file_name = os.path.expanduser(DEFAULT_CONFIG_FILE)
+        config_file_name = os.path.expanduser(command_line_settings["config_file"])
         with open(config_file_name, "r") as config_file:
             config_file_content = config_file.read()
         if config_file_content:
@@ -456,8 +463,8 @@ def config_dict_to_namespace(config_dict):
 
 def get_configuration():
     factory_settings = get_complete_factory_settings()
-    config_file_settings = get_config_file_settings()
     command_line_settings = get_command_line_settings()
+    config_file_settings = get_config_file_settings(command_line_settings)
     config = merge_settings(
         factory_settings,
         config_file_settings,
