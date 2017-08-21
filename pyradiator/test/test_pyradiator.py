@@ -2,9 +2,9 @@ from datetime import datetime
 from random import randrange
 from threading import Timer
 
-from dispatcher import Dispatcher
-from endpoint import Consumer
-from endpoint import Producer
+from pyradiator.dispatcher import Dispatcher
+from pyradiator.endpoint import Consumer
+from pyradiator.endpoint import Producer
 
 
 PRODUCER_WAKE_UP_TIME = 2
