@@ -1,6 +1,6 @@
 import logging
-
 from importlib import import_module
+
 
 LOGGER = logging.getLogger(__name__)
 

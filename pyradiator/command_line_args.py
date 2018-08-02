@@ -9,6 +9,7 @@ import sys
 
 import pygame
 
+
 LOGGER = logging.getLogger(__name__)
 DISPLAY_INFO = None
 DEFAULT_CONFIG_FILE = "~/.config/pyradiator.json"

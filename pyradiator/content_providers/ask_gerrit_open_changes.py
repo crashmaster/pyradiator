@@ -5,6 +5,7 @@ import prettytable
 import requests
 
 from pyradiator.common import ColoredString
+from pyradiator.common import get_authenticator
 
 
 def get_gerrit_query_url(gerrit_url, project, team):

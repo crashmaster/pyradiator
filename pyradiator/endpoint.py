@@ -4,8 +4,6 @@ except ImportError:
     import Queue    # noqa
 import threading
 
-import pygame
-
 
 class Producer(object):
 

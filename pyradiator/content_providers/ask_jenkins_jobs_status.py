@@ -3,8 +3,8 @@ import logging
 import re
 import time
 
-import requests
 import prettytable
+import requests
 
 from pyradiator.common import ColoredString
 from pyradiator.common import get_authenticator
