@@ -6,7 +6,7 @@
             "content_provider": "ask_jenkins_jobs_status",
             "content_provider_args": {
                 "jobs": {
-                    "url": "https://fem002-eiffel018.rnd.ki.sw.ericsson.se:8443/jenkins/view/lambda-view/",
+                    "url": "https://fem004-eiffel018.rnd.ki.sw.ericsson.se:8443/jenkins/view/lambda-view/",
                     "job_names": [
                         "lambda-ecs-watchmen-build-package",
                         "lambda-ecs-watchmen-install-packages",
