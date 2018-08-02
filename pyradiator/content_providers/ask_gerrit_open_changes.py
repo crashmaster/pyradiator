@@ -11,7 +11,7 @@ from pyradiator.common import get_authenticator
 def get_gerrit_query_url(gerrit_url, project, team):
     address = get_gerrit_changes_address(gerrit_url)
     query = get_gerrit_query(project, team)
-    return "{}{}".format(address, urllib.quote(query))
+    return "{}{}".format(address, urllib.parse.quote(query))
 
 
 def get_gerrit_changes_address(gerrit_url):
