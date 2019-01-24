@@ -1,16 +1,13 @@
 {
     "channels": {
         "jenkins": {
-            "update_period": 15,
+            "update_period": 30,
             "font_size": null,
             "content_provider": "ask_jenkins_jobs_status",
             "content_provider_args": {
                 "jobs": {
                     "url": "https://fem004-eiffel018.rnd.ki.sw.ericsson.se:8443/jenkins/view/lambda-view/",
                     "job_names": [
-                        "lambda-ecs-watchmen-build-package",
-                        "lambda-ecs-watchmen-install-packages",
-                        "lambda-ecs-watchmen-run-feature-tests",
                         "lambda-ecs-watchmen-run-code-checkers",
                         "lambda-ecs-watchmen-run-unit-tests",
                         "lambda-ecs-watchmen-build-papi-documentation"
@@ -18,6 +15,31 @@
                 }
             },
             "surface_number": 0
+        },
+        "review": {
+            "update_period": 30,
+            "font_size": null,
+            "content_provider": "ask_gerrit_open_changes",
+            "content_provider_args": {
+                "gerrit_url": "gerrit.ericsson.se",
+                "project": "cee/watchmen",
+                "team": "ecs_cee_watchmen_team"
+            },
+            "surface_number": 1
+        },
+        "cow": {
+            "update_period": 30,
+            "font_size": null,
+            "content_provider": "ask_the_cow",
+            "content_provider_args": {},
+            "surface_number": 2
+        },
+        "top": {
+            "update_period": 3,
+            "font_size": null,
+            "content_provider": "ask_top",
+            "content_provider_args": {},
+            "surface_number": 3
         }
     },
     "font": "dejavusansmono",
@@ -42,8 +64,8 @@
         0
     ],
     "margin_size": 5,
-    "number_of_left_rows": 1,
-    "number_of_right_rows": 0,
+    "number_of_left_rows": 2,
+    "number_of_right_rows": 2,
     "screen_layout": "0+2+2+0",
     "static_bg_color": [
         0,
@@ -60,7 +82,7 @@
         0,
         0
     ],
-    "window_height": 768,
+    "window_height": 1000,
     "window_title": "PyRadiator",
-    "window_width": 1024
+    "window_width": 1600
 }
